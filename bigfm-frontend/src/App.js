@@ -13,8 +13,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import NavBar from './components/NavBar';
 import Dashboard from './components/Dashboard';
-import  UploadData  from './components/uploadData';
+import UploadData from './components/uploadData';
 import ConversationView from './components/chatPage';
+import MissedClients from './components/missedclients';
 
 const drawerWidth = 280;
 
@@ -324,6 +325,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/upload" element={<UploadData />} />
               <Route path="/conversation" element={<ConversationView />} />
+              <Route path="/missed-clients" element={<MissedClients />} />
             </Routes>
           </Box>
         </Box>

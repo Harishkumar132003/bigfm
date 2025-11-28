@@ -14,6 +14,7 @@ import Chip from '@mui/material/Chip';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import PersonOffOutlinedIcon from '@mui/icons-material/PersonOffOutlined';
 import { useNavigate } from 'react-router-dom';
 const drawerWidth = 280;
 
@@ -21,6 +22,7 @@ const navItems = [
     { id: 'upload', label: 'UploadData', icon: <UploadFileIcon /> },
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardOutlinedIcon /> },
     { id: 'conversation', label: 'Conversation AI', icon: <ChatOutlinedIcon /> },
+    { id: 'missed-clients', label: 'Missed Clients', icon: <PersonOffOutlinedIcon /> },
 ];
 
 function NavBar() {

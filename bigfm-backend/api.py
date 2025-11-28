@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import pandas as pd
 import mysql.connector
+from decimal import Decimal
 
 class SQLModel(BaseModel):
     sql: str = Field(description="Generated SQL query")
@@ -575,9 +576,149 @@ def upload_market_data():
 
 
 
-@app.get("/")
-def home():
-    return {"message": "Fast SQL Chat with Chart Support Running"}
+@app.route('/getMissedclients', methods=['GET'])
+def get_missed_clients():
+    broadcaster = request.args.get("broadcaster")
+    city = request.args.get("city")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    page = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 10))  # default 10
+
+    if not broadcaster:
+        return jsonify({"error": "broadcaster parameter required"}), 400
+
+    mapping = {
+        "BIG FM": "BIG_FM",
+        "FEVER": "FEVER",
+        "MY FM": "MY_FM",
+        "OTHERS": "OTHERS",
+        "RADIO CITY": "RADIO_CITY",
+        "RADIO MIRCHI": "RADIO_MIRCHI",
+        "RED FM": "RED_FM"
+    }
+
+    if broadcaster not in mapping:
+        return jsonify({"error": "Invalid broadcaster"}), 400
+
+    selected_col = mapping[broadcaster]
+
+    group_case = """  
+        CASE
+            WHEN broadcaster LIKE 'RADIO MIRCHI LOVE%' THEN 'RADIO MIRCHI LOVE'
+            WHEN broadcaster LIKE 'RADIO MIRCHI%' THEN 'RADIO MIRCHI'
+            WHEN broadcaster LIKE 'PUNJABI FEVER%' THEN 'PUNJABI FEVER'
+            WHEN broadcaster LIKE 'FEVER%' THEN 'FEVER'
+            WHEN broadcaster LIKE 'BIG FM%' THEN 'BIG FM'
+            WHEN broadcaster LIKE 'RED FM%' THEN 'RED FM'
+            WHEN broadcaster LIKE 'MY FM%' THEN 'MY FM'
+            WHEN broadcaster LIKE 'RADIO CITY%' THEN 'RADIO CITY'
+            ELSE TRIM(broadcaster)
+        END
+    """
+
+    filters = "WHERE 1=1"
+    params = {}
+
+    if city:
+        filters += " AND city = :city"
+        params["city"] = city
+
+    if start_date:
+        filters += " AND ad_date >= :start_date"
+        params["start_date"] = start_date
+
+    if end_date:
+        filters += " AND ad_date <= :end_date"
+        params["end_date"] = end_date
+
+    offset = (page - 1) * limit
+
+    # Main paginated query
+    sql = f"""
+        SELECT
+            city,
+            parent,
+            SUM(CASE WHEN {group_case} = 'BIG FM' THEN seconds ELSE 0 END) AS BIG_FM,
+            SUM(CASE WHEN {group_case} = 'FEVER' THEN seconds ELSE 0 END) AS FEVER,
+            SUM(CASE WHEN {group_case} = 'MY FM' THEN seconds ELSE 0 END) AS MY_FM,
+            SUM(CASE WHEN {group_case} = 'RADIO CITY' THEN seconds ELSE 0 END) AS RADIO_CITY,
+            SUM(CASE WHEN {group_case} = 'RADIO MIRCHI' THEN seconds ELSE 0 END) AS RADIO_MIRCHI,
+            SUM(CASE WHEN {group_case} = 'RED FM' THEN seconds ELSE 0 END) AS RED_FM,
+            SUM(CASE WHEN {group_case} NOT IN (
+                'BIG FM', 'FEVER', 'MY FM', 'RADIO CITY', 'RADIO MIRCHI', 'RED FM'
+            ) THEN seconds ELSE 0 END) AS OTHERS
+        FROM advertiser_broadcaster_stats
+        {filters}
+        GROUP BY city, parent
+        HAVING {selected_col} = 0
+           AND (BIG_FM + FEVER + MY_FM + RADIO_CITY + RADIO_MIRCHI + RED_FM + OTHERS) > 0
+        ORDER BY city, parent
+        LIMIT :limit OFFSET :offset;
+    """
+
+    params["limit"] = limit
+    params["offset"] = offset
+
+    # Count total records for pagination UI
+    sql_count = f"""
+    SELECT COUNT(*) AS total
+    FROM (
+        SELECT
+            city, parent,
+            SUM(CASE WHEN {group_case} = 'BIG FM' THEN seconds ELSE 0 END) AS BIG_FM,
+            SUM(CASE WHEN {group_case} = 'FEVER' THEN seconds ELSE 0 END) AS FEVER,
+            SUM(CASE WHEN {group_case} = 'MY FM' THEN seconds ELSE 0 END) AS MY_FM,
+            SUM(CASE WHEN {group_case} = 'RADIO CITY' THEN seconds ELSE 0 END) AS RADIO_CITY,
+            SUM(CASE WHEN {group_case} = 'RADIO MIRCHI' THEN seconds ELSE 0 END) AS RADIO_MIRCHI,
+            SUM(CASE WHEN {group_case} = 'RED FM' THEN seconds ELSE 0 END) AS RED_FM,
+            SUM(CASE WHEN {group_case} NOT IN (
+                'BIG FM', 'FEVER', 'MY FM', 'RADIO CITY', 'RADIO MIRCHI', 'RED FM'
+            ) THEN seconds ELSE 0 END) AS OTHERS
+        FROM advertiser_broadcaster_stats
+        {filters}
+        GROUP BY city, parent
+        HAVING {selected_col} = 0
+           AND (BIG_FM + FEVER + MY_FM + RADIO_CITY + RADIO_MIRCHI + RED_FM + OTHERS) > 0
+    ) AS t;
+"""
+
+
+    engine = db._engine
+    with engine.connect() as conn:
+        result = conn.execute(text(sql), params)
+        rows = result.mappings().all()
+        total_records = conn.execute(text(sql_count), params).scalar()
+
+    data = []
+    for row in rows:
+        total = (
+            float(row["BIG_FM"]) + float(row["FEVER"]) + float(row["MY_FM"]) +
+            float(row["OTHERS"]) + float(row["RADIO_CITY"]) +
+            float(row["RADIO_MIRCHI"]) + float(row["RED_FM"])
+        )
+
+        obj = {
+            "city": row["city"],
+            "parent": row["parent"],
+            "BIG_FM": f"{round((float(row['BIG_FM']) / total) * 100)}%" if total else "0%",
+            "FEVER": f"{round((float(row['FEVER']) / total) * 100)}%" if total else "0%",
+            "MY_FM": f"{round((float(row['MY_FM']) / total) * 100)}%" if total else "0%",
+            "OTHERS": f"{round((float(row['OTHERS']) / total) * 100)}%" if total else "0%",
+            "RADIO_CITY": f"{round((float(row['RADIO_CITY']) / total) * 100)}%" if total else "0%",
+            "RADIO_MIRCHI": f"{round((float(row['RADIO_MIRCHI']) / total) * 100)}%" if total else "0%",
+            "RED_FM": f"{round((float(row['RED_FM']) / total) * 100)}%" if total else "0%",
+            "total_seconds": total
+        }
+        data.append(obj)
+
+    return jsonify({
+        "page": page,
+        "limit": limit,
+        "total_records": total_records,
+        "total_pages": (total_records + limit - 1) // limit,
+        "records": data
+    })
 
 
 if __name__ == "__main__":
