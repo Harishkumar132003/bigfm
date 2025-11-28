@@ -12,12 +12,13 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import { useNavigate } from 'react-router-dom';
 const drawerWidth = 280;
 
 const navItems = [
-    { id: 'upload', label: 'UploadData', icon: <DashboardOutlinedIcon /> },
+    { id: 'upload', label: 'UploadData', icon: <UploadFileIcon /> },
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardOutlinedIcon /> },
     { id: 'conversation', label: 'Conversation AI', icon: <ChatOutlinedIcon /> },
 ];
@@ -32,22 +33,23 @@ function NavBar() {
 
     return (
         <>
-            <AppBar
-                position="fixed"
-                sx={(t) => ({
-                    zIndex: t.zIndex.drawer + 1,
-                    width: `calc(100% - ${drawerWidth}px)`,
-                    ml: `${drawerWidth}px`,
-                    background: 'linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)',
-                    color: '#fff',
-                })}
-            >
-                <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                        BigFM — AI Hub
-                    </Typography>
-                </Toolbar>
-            </AppBar>
+           <AppBar
+    position="fixed"
+    sx={(t) => ({
+        zIndex: t.zIndex.drawer + 1,
+        width: `calc(100% - ${drawerWidth}px)`,
+        ml: `${drawerWidth}px`,
+        background: 'linear-gradient(117deg, #4a9cda 0%, #0179d6 100%)',
+        color: '#fff !important',
+        boxShadow: '0px 2px 8px rgba(0, 120, 212, 0.15)',
+    })}
+>
+    <Toolbar>
+        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700,color: '#fff' }}>
+            BigFM
+        </Typography>
+    </Toolbar>
+</AppBar>
 
             <Drawer
                 variant="permanent"
@@ -63,8 +65,9 @@ function NavBar() {
                 }}
             >
                 <Toolbar sx={{ px: 2, gap: 1 }}>
+                    <img src='/bigfmlogo.png' alt='logo' style={{width:'50px',height:'50px'}}/>
                     <Typography variant="h6">BigFM</Typography>
-                    <Chip label="Desktop" size="small" color="primary" variant="outlined" />
+                    {/* <Chip label="Fuel Your Life" size="small" color="primary" variant="outlined" /> */}
                 </Toolbar>
                 <Divider />
                 <List sx={{ px: 1.5, py: 1.5 }}>

@@ -139,15 +139,16 @@ export default function ConversationView() {
   // ------------------ UI ------------------
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
-      <Typography variant="h6" sx={{ mb: 1 }}>
+      <Typography variant="h6" sx={{ mb: 1 ,display:'flex', alignItems:'center',gap:0.5}}>
         Conversation
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary">
         Chat with your AI assistant — ask any business question.
       </Typography>
+      </Typography>
+      
 
       {/* MESSAGES */}
-      <Stack spacing={1.5} sx={{ pb: 6, height: 'calc(100% - 174px)', overflowY: 'auto' }}>
+      <Stack spacing={1.5} sx={{ pb: 6, height: 'calc(100% - 123px)', overflowY: 'auto' }}>
         {messages.map((m) => (
           <Box key={m.id} sx={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <Stack direction="row" spacing={1} sx={{ maxWidth: '72%' }}>

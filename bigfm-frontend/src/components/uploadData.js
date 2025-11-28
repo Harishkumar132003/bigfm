@@ -11,7 +11,7 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { originlist } from "../constant/constantValue";
 import { DatePicker } from "antd";
-import axios from "axios"; // ⬅️ Important
+import axios from "axios";
 const { RangePicker } = DatePicker;
 
 const UploadData = () => {
@@ -40,16 +40,12 @@ const UploadData = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/upload_market_data",  // ⬅️ Your backend API URL
+        "http://localhost:5000/upload_market_data",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
-      setCity("");
-      setDateRange(null);
-      setFile(null);
 
       alert("🚀 Data Uploaded Successfully!");
       console.log("Response:", res.data);
@@ -70,25 +66,52 @@ const UploadData = () => {
   return (
     <Box sx={{ maxWidth: 700, margin: "0 auto", mt: 4 }}>
       <Paper
-        elevation={4}
+        elevation={3}
         sx={{
           p: 4,
-          borderRadius: 4,
-          background:
-            "linear-gradient(135deg, #fafaff 0%, #f1ecff 60%, #e5faff 100%)"
+          borderRadius: 3,
+          background: "linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 50%, #deeff9 100%)",
+          border: "1px solid #E0F2FE",
+          boxShadow: "0px 8px 24px rgba(0, 120, 212, 0.1)",
         }}
       >
-        <Typography variant="h5" fontWeight={700} sx={{ mb: 3,textAlign: "center" }}>
-           Upload Market Data
+        <Typography 
+          variant="h5" 
+          fontWeight={700} 
+          sx={{ 
+            mb: 3, 
+            textAlign: "center",
+            color: "#1E293B",
+            letterSpacing: "-0.01em"
+          }}
+        >
+          Upload Market Data
         </Typography>
 
-        <Stack component="form" spacing={2.4} onSubmit={handleSubmit}>
+        <Stack component="form" spacing={3} onSubmit={handleSubmit}>
           <TextField
             select
             fullWidth
             label="Select Origin / City"
             value={city}
             onChange={(e) => setCity(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                backgroundColor: "#FFFFFF",
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#F8FAFC",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#FFFFFF",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#0078D4",
+                    borderWidth: 2,
+                  },
+                },
+              },
+            }}
           >
             {originlist.map((item, index) => (
               <MenuItem key={index} value={item}>
@@ -98,19 +121,25 @@ const UploadData = () => {
           </TextField>
 
           <Box>
-            <Typography sx={{ mb: 0.5 }} fontSize="0.9rem" fontWeight={500}>
+            <Typography 
+              sx={{ mb: 1 }} 
+              fontSize="0.9rem" 
+              fontWeight={600}
+              color="#475569"
+            >
               Date Range
             </Typography>
             <RangePicker
-              value={dateRange}              
+              value={dateRange}
               onChange={(dates) => setDateRange(dates)}
               style={{
                 width: "100%",
-                height: "52px",
-                borderRadius: "12px",
+                height: "54px",
+                borderRadius: "10px",
                 fontSize: "16px",
                 padding: "10px 14px",
-                border: "1px solid rgba(0,0,0,0.23)",
+                border: "1px solid #CBD5E1",
+                transition: "all 0.2s ease-in-out",
               }}
               className="custom-range-picker"
             />
@@ -120,17 +149,24 @@ const UploadData = () => {
             component="label"
             variant="outlined"
             sx={{
-              py: 1.6,
-              borderRadius: 2,
+              py: 1.8,
+              borderRadius: 2.5,
               borderStyle: "dashed",
-              borderColor: "#7C3AED",
-              color: "#7C3AED",
+              borderWidth: 2,
+              borderColor: "#0078D4",
+              color: "#0078D4",
+              backgroundColor: "#FFFFFF",
+              fontWeight: 600,
+              transition: "all 0.3s ease-in-out",
               "&:hover": {
-                borderColor: "#06B6D4",
-                color: "#06B6D4"
+                borderColor: "#FFD500",
+                backgroundColor: "#FFFBEB",
+                color: "#005A9E",
+                transform: "translateY(-2px)",
+                boxShadow: "0px 4px 12px rgba(0, 120, 212, 0.15)",
               }
             }}
-            startIcon={<CloudUploadIcon />}
+            startIcon={<CloudUploadIcon sx={{ fontSize: "24px !important" }} />}
           >
             {file ? file.name : "Upload XLS / CSV File"}
             <input
@@ -148,13 +184,25 @@ const UploadData = () => {
             disabled={loading}
             sx={{
               mt: 2,
-              py: 1.5,
+              py: 1.8,
               fontSize: "1rem",
-              borderRadius: 2,
-              background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)"
+              fontWeight: 700,
+              borderRadius: 2.5,
+              background: "#0078D4",
+              boxShadow: "0px 4px 12px rgba(0, 120, 212, 0.25)",
+              transition: "all 0.3s ease-in-out",
+              "&:hover": {
+                background: "linear-gradient(135deg, #005A9E 0%, #004578 100%)",
+                transform: "translateY(-2px)",
+                boxShadow: "0px 6px 16px rgba(0, 120, 212, 0.35)",
+              },
+              "&:disabled": {
+                background: "linear-gradient(135deg, #94A3B8 0%, #64748B 100%)",
+                color: "#FFFFFF",
+              }
             }}
           >
-            {loading ? "⏳ Uploading..." : "🚀 Submit Data"}
+            {loading ? "Uploading..." : "Submit Data"}
           </Button>
         </Stack>
       </Paper>
