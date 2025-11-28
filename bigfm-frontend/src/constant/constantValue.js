@@ -1,0 +1,23 @@
+export  const originlist = [
+    "Ahmedabad",
+    "Bangalore",
+    "Bhopal",
+    "Chandigarh",
+    "Chennai",
+    "Coimbatore",
+    "Delhi",
+    "Hyderabad",
+    "Indore",
+    "Jaipur",
+    "Kanpur",
+    "Kochi",
+    "Kolkata",
+    "Lucknow",
+    "Mumbai",
+    "Nagpur",
+    "Pune",
+    "Surat",
+    "Trivandrum",
+    "Vadodara",
+    "Vizag"
+]

@@ -1,0 +1,49 @@
+# Node / React frontend
+bigfm-frontend/node_modules/
+bigfm-frontend/.next/
+bigfm-frontend/dist/
+bigfm-frontend/.env
+bigfm-frontend/.env.local
+bigfm-frontend/.env.development
+bigfm-frontend/.env.production
+bigfm-frontend/yarn-error.log
+bigfm-frontend/npm-debug.log
+
+# Python / Flask backend
+bigfm-backend/__pycache__/
+bigfm-backend/.venv/
+bigfm-backend/venv/
+bigfm-backend/env/
+bigfm-backend/.env
+bigfm-backend/*.pyc
+bigfm-backend/instance/
+bigfm-backend/migrations/
+
+# Docker
+*.pid
+*.log
+docker-data/
+docker-volume/
+volume-data/
+
+# System / OS files
+.DS_Store
+Thumbs.db
+
+# Python cache
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Logs
+*.log
+
+# IDE configs
+.vscode/
+.idea/
+*.iml
+
+# Environment
+.env
+.env.*

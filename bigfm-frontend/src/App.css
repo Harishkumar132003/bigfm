@@ -1,0 +1,28 @@
+/* Match MUI TextField look */
+.custom-range-picker {
+  border-radius: 12px !important;
+}
+
+.custom-range-picker:hover {
+  border-color: #7c3aed !important;
+}
+
+.custom-range-picker.ant-picker-focused {
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2) !important;
+}
+
+/* inside text */
+.custom-range-picker .ant-picker-input > input {
+  font-size: 16px;
+  padding: 6px 0;
+}
+
+/* Calendar icon color */
+.custom-range-picker .ant-picker-suffix {
+  color: #7c3aed !important;
+}
+
+.custom-range-picker input {
+  text-align: center;
+}
