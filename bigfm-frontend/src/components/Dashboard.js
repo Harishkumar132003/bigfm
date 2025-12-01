@@ -46,6 +46,14 @@ const originlist = [
     "Vizag"
 ]
 
+const variationColor = "#16A34A" ;
+const variationText = (
+  <span style={{ color: variationColor }}>
+    <img src="/uparrowicon.svg" alt="Up Arrow" style={{ verticalAlign: 'middle', marginRight: 4 }} />
+   +0.35% vs last week
+  </span>
+);
+
 
 
 function StatCard({ title, value, caption, color }) {
@@ -59,6 +67,7 @@ function StatCard({ title, value, caption, color }) {
                 borderRadius: 3,
                 background: `linear-gradient(135deg, ${bgA} 0%, rgba(255,255,255,0.7) 100%)`,
                 border: `1px solid ${bdA}`,
+                width: '100%',
             }}
         >
             <Typography variant="overline" color="text.secondary">
@@ -109,7 +118,7 @@ function Dashboard() {
 
     return (
         <Stack spacing={3}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
                     <InputLabel id="city-select-label">City</InputLabel>
                     <Select
@@ -126,19 +135,40 @@ function Dashboard() {
                         ))}
                     </Select>
                 </FormControl>
-            </Box>
+            </Box> */}
 
             <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
-                    <StatCard title="Market Share" value={bigfmdata?.percent || 0} caption="+8.3% vs last week" color="#7C3AED" />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <StatCard title="Missed Volume" value={missedclient?.missed_client_seconds || 0} caption="+2.1% vs last week" color="#06B6D4" />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <StatCard title="Critical Misses" value={missedclient?.missed_client_count || 0} caption="-0.4% vs last week" color="#F59E0B" />
-                </Grid>
-            </Grid>
+    <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "stretch" ,width:"100%"}}>
+        <StatCard
+        
+            title="Market Share"
+            value={`${bigfmdata?.percent || 0}%`}
+            caption={variationText}
+            color="#7C3AED"
+            sx={{ height: "100%" }}
+        />
+    </Grid>
+
+    <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "stretch" }}>
+        <StatCard
+            title="Missed Client Seconds"
+            value={`${missedclient?.missed_client_seconds || 0} Seconds`}
+            caption=" "
+            color="#06B6D4"
+            sx={{ height: "100%" }}
+        />
+    </Grid>
+
+    <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "stretch" }}>
+        <StatCard
+            title="Total Missed Clients"
+            value={missedclient?.missed_client_count || 0}
+            color="#F59E0B"
+            sx={{ height: "100%" }}
+        />
+    </Grid>
+</Grid>
+
 
             <Grid container spacing={2}>
                 {/* Market Share by Origin (Donut/Pie) */}
