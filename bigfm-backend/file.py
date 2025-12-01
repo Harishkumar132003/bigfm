@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 import os    
 
-file_path = 'data/Excecl Merge Macro.xlsx'
+file_path = '/home/wizzgeeks/Downloads/step7_Market Share Analysis Nov 25.xlsx'
 output_dir = "/home/wizzgeeks/Downloads/Split files"
 
 os.makedirs(output_dir, exist_ok=True)

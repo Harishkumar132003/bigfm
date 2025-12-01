@@ -22,18 +22,18 @@ const UploadData = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!city || !dateRange || !file) {
+    if (!file) {
       alert("⚠ Please fill all fields before submitting!");
       return;
     }
 
-    const formattedFrom = dateRange[0]?.format("YYYY-MM-DD");
-    const formattedTo = dateRange[1]?.format("YYYY-MM-DD");
+    // const formattedFrom = dateRange[0]?.format("YYYY-MM-DD");
+    // const formattedTo = dateRange[1]?.format("YYYY-MM-DD");
 
     const formData = new FormData();
-    formData.append("city", city);
-    formData.append("date_from", formattedFrom);
-    formData.append("date_to", formattedTo);
+    // formData.append("city", city);
+    // formData.append("date_from", formattedFrom);
+    // formData.append("date_to", formattedTo);
     formData.append("file", file);
 
     try {
@@ -89,7 +89,7 @@ const UploadData = () => {
         </Typography>
 
         <Stack component="form" spacing={3} onSubmit={handleSubmit}>
-          <TextField
+          {/* <TextField
             select
             fullWidth
             label="Select Origin / City"
@@ -118,9 +118,9 @@ const UploadData = () => {
                 {item}
               </MenuItem>
             ))}
-          </TextField>
+          </TextField> */}
 
-          <Box>
+          {/* <Box>
             <Typography 
               sx={{ mb: 1 }} 
               fontSize="0.9rem" 
@@ -143,7 +143,7 @@ const UploadData = () => {
               }}
               className="custom-range-picker"
             />
-          </Box>
+          </Box> */}
 
           <Button
             component="label"

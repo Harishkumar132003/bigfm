@@ -19,15 +19,16 @@ import { useNavigate } from 'react-router-dom';
 const drawerWidth = 280;
 
 const navItems = [
-    { id: 'upload', label: 'UploadData', icon: <UploadFileIcon /> },
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardOutlinedIcon /> },
+    { id: 'upload', label: 'UploadData', icon: <UploadFileIcon /> },
     { id: 'conversation', label: 'Conversation AI', icon: <ChatOutlinedIcon /> },
-    { id: 'missed-clients', label: 'Missed Clients', icon: <PersonOffOutlinedIcon /> },
+    { id: 'missedclients', label: 'Missed Clients', icon: <PersonOffOutlinedIcon /> },
 ];
 
 function NavBar() {
     const nav = useNavigate();
-      const [active, setActive] = useState('dashboard');
+    const path = window.location.pathname.split('/')[1];
+      const [active, setActive] = useState(path.length ? path: 'dashboard');
       const handleNavClick = (id) => {
           setActive(id);
           nav(`/${id}`);

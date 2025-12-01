@@ -13,17 +13,17 @@ import {
   useTheme,
   TextField,
   MenuItem,
-  Button,
   Grid,
   CircularProgress,
   IconButton,
+  Button,
 } from '@mui/material';
 import { DatePicker } from 'antd';
 import { originlist } from '../constant/constantValue';
 import { exportMissedClients } from '../api';
 import Close from '@mui/icons-material/Close';
 
-const { RangePicker } = DatePicker;
+const WEEKS = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
 
 const BROADCASTERS = [
   'BIG FM',
@@ -36,7 +36,7 @@ const BROADCASTERS = [
 
 const columns = [
   { id: 'parent', label: 'Client Name', minWidth: 200 },
-  { id: 'city', label: 'City', minWidth: 100 },
+  { id: 'station', label: 'City', minWidth: 100 },
   { id: 'BIG_FM', label: 'BIG FM', minWidth: 80, align: 'center' },
   { id: 'FEVER', label: 'FEVER', minWidth: 80, align: 'center' },
   { id: 'MY_FM', label: 'MY FM', minWidth: 80, align: 'center' },
@@ -54,71 +54,78 @@ const columns = [
 ];
 
 const MissedClients = () => {
+  const theme = useTheme();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
+
   const [filters, setFilters] = useState({
     broadcaster: 'BIG FM',
     city: 'All Cities',
-    dateRange: null,
+     monthObj: null,
+  yearObj: null,  
+    month: null,
+    year: null,
+    week: '',
   });
 
-  const theme = useTheme();
-
-  const fetchData = async () => {
-    setLoading(true);
-    const params = new URLSearchParams({
-      broadcaster: filters.broadcaster,
-      page: page + 1,
-      limit: rowsPerPage,
-      ...((filters.city && filters.city !== 'All Cities') && { city: filters.city }),
-      ...(filters.dateRange && {
-        start_date: filters.dateRange[0].format('YYYY-MM-DD'),
-        end_date: filters.dateRange[1].format('YYYY-MM-DD'),
-      }),
-    });
-
-    exportMissedClients(params)
-      .then((response) => {
-        const result = response.data;
-        setData(result.records || []);
-        setTotalRecords(result.total_records || 0);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [page, rowsPerPage, filters]);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
   const handleFilterChange = (field, value) => {
+    if (field === "month" && value) {
+  const month = value.format("MMM");
+  const year = value.format("YYYY");
+  
+  console.log("Month:", month, "Year:", year);
+
+  setFilters((prev) => ({
+    ...prev,
+    month,
+    year ,monthObj: value// <- auto update year too
+  }));
+  setPage(0);
+  return;
+}
+
     setFilters((prev) => ({ ...prev, [field]: value }));
+    setPage(0);
   };
 
   const handleResetFilters = () => {
     setFilters({
       broadcaster: 'BIG FM',
-      city: '',
-      dateRange: null,
+      city: 'All Cities',
+      month: null,
+      year: null,
+      week: '',
     });
     setPage(0);
   };
+
+  const fetchData = async () => {
+    setLoading(true);
+    const params = new URLSearchParams({
+      channel_club: filters.broadcaster,
+      page: page + 1,
+      limit: rowsPerPage,
+      ...(filters.city && filters.city !== 'All Cities' && { station: filters.city }),
+      ...(filters.month && { month: filters.month }),
+      ...(filters.year && { year: filters.year }),
+      ...(filters.week && { week: filters.week }),
+    });
+
+    exportMissedClients(params)
+      .then((response) => {
+        setData(response.data.records || []);
+        setTotalRecords(response.data.total_records || 0);
+      })
+      .catch((error) => console.error('Error fetching data:', error))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [page, rowsPerPage, filters]);
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
@@ -127,107 +134,81 @@ const MissedClients = () => {
       </Typography>
 
       <Paper sx={{ p: 2, mb: 3, boxShadow: 2 }}>
-        <Grid
-          container
-          spacing={2}
-          alignItems='center'
-          sx={{ display: 'flex', justifyContent: 'space-between' }}
-        >
-          <Grid
-            item
-            sx={{
-              display: 'flex',
-              gap: 2,
-              flexWrap: 'wrap',
-              alignItems: 'end',
-            }}
-          >
-            <Box sx={{ minWidth: 200 }}>
-              <Typography
-                sx={{ mb: 1 }}
-                fontSize='0.9rem'
-                fontWeight={600}
-                color='#475569'
-              >
-                City
-              </Typography>
-
-              <TextField
-                select
-                fullWidth
-                value={filters.city || ''}
-                onChange={(e) => handleFilterChange('city', e.target.value)}
-                size='small'
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '10px',
-                    backgroundColor: '#FFFFFF',
-                  },
-                  legend: { display: 'none' },
-                }}
-                InputProps={{
-                  endAdornment: (filters.city && filters.city !== 'All Cities') ? (
-                    <IconButton
-                      size='small'
-                      onClick={() => handleFilterChange('city', 'All Cities')}
-                      sx={{ mr: 1 }}
-                    >
-                      <Close fontSize='small' />
-                    </IconButton>
-                  ) : null,
-                }}
-              >
-                <MenuItem value='All Cities'>All Cities</MenuItem>
-                {originlist.map((city) => (
-                  <MenuItem key={city} value={city}>
-                    {city}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-
-            {/* DATE RANGE */}
-            <Box sx={{ minWidth: 260 }}>
-              <Typography
-                sx={{ mb: 1 }}
-                fontSize='0.9rem'
-                fontWeight={600}
-                color='#475569'
-              >
-                Date Range
-              </Typography>
-              <RangePicker
-                value={filters.dateRange}
-                onChange={(dates) => handleFilterChange('dateRange', dates)}
-                style={{
-                  width: '100%',
-                  height: '40px',
-                  borderRadius: '10px',
-                  fontSize: '16px',
-                  padding: '10px 14px',
-                  border: '1px solid #CBD5E1',
-                }}
-              />
-            </Box>
+        <Grid container spacing={2} alignItems="center" flexWrap="wrap">
+          
+          {/* CITY */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography fontSize="0.9rem" fontWeight={600} mb={1}>City</Typography>
+            <TextField
+              select
+              fullWidth
+              value={filters.city}
+              onChange={(e) => handleFilterChange('city', e.target.value)}
+              size="small"
+              InputProps={{
+                endAdornment: filters.city !== 'All Cities' && (
+                  <IconButton size="small" onClick={() => handleFilterChange('city', 'All Cities')}>
+                    <Close fontSize="small" />
+                  </IconButton>
+                ),
+              }}
+            >
+              <MenuItem value="All Cities">All Cities</MenuItem>
+              {originlist.map((city) => (
+                <MenuItem key={city} value={city}>{city}</MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
-          {/* RIGHT SIDE – ACTION BUTTONS */}
+          {/* MONTH */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography fontSize="0.9rem" fontWeight={600} mb={1}>Month</Typography>
+            <DatePicker
+              picker="month"
+              value={filters.monthObj}
+              onChange={(v) => handleFilterChange('month', v)}
+              style={{ width: '100%' }}
+            />
+          </Grid>
+
+
+          {/* WEEK */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography fontSize="0.9rem" fontWeight={600} mb={1}>Week</Typography>
+            <TextField
+              select
+              fullWidth
+              value={filters.week}
+              onChange={(e) => handleFilterChange('week', e.target.value)}
+              size="small"
+            >
+              <MenuItem value="">All Weeks</MenuItem>
+              {WEEKS.map((wk) => (
+                <MenuItem key={wk} value={wk}>{wk}</MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+
+          {/* RESET BTN */}
+          
+
         </Grid>
       </Paper>
 
+      {/* TABLE */}
       <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 3 }}>
         <TableContainer sx={{ maxHeight: 'calc(100vh - 300px)' }}>
-          <Table stickyHeader aria-label='sticky table'>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
                   <TableCell
                     key={column.id}
                     align={column.align || 'left'}
-                    style={{
+                    sx={{
                       minWidth: column.minWidth,
                       backgroundColor: theme.palette.primary.main,
-                      color: theme.palette.primary.contrastText,
+                      color: '#fff !important',
                       fontWeight: 'bold',
                     }}
                   >
@@ -236,42 +217,27 @@ const MissedClients = () => {
                 ))}
               </TableRow>
             </TableHead>
+
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    align='center'
-                    sx={{ py: 4 }}
-                  >
+                  <TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : data.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    align='center'
-                    sx={{ py: 4 }}
-                  >
+                  <TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
                     No data available
                   </TableCell>
                 </TableRow>
               ) : (
                 data.map((row, index) => (
-                  <TableRow hover role='checkbox' tabIndex={-1} key={index}>
+                  <TableRow hover key={index}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
-                        <TableCell
-                          key={column.id}
-                          align={column.align || 'left'}
-                          sx={{
-                            '&:nth-of-type(odd)': {
-                              backgroundColor: theme.palette.action.hover,
-                            },
-                          }}
-                        >
+                        <TableCell key={column.id} align={column.align || 'left'}>
                           {column.format && typeof value === 'number'
                             ? column.format(value)
                             : value}
@@ -284,14 +250,18 @@ const MissedClients = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
         <TablePagination
           rowsPerPageOptions={[10, 25, 50]}
-          component='div'
           count={totalRecords}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+          component="div"
+          onPageChange={(e, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(+e.target.value);
+            setPage(0);
+          }}
         />
       </Paper>
     </Box>

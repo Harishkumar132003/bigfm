@@ -1,86 +1,106 @@
 import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import axios from 'axios';
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
+import {
+    Box, CircularProgress, Typography,
+    Table, TableBody, TableCell,
+    TableContainer, TableHead, TableRow, Paper
+} from '@mui/material';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const COLORS = [
+    "#0088FE", // BIG_FM
+    "#00C49F", // FEVER
+    "#FFBB28", // MY_FM
+    "#FF8042", // OTHERS
+    "#E57373", // RADIO_CITY
+    "#9575CD", // RADIO_MIRCHI
+    "#4DB6AC", // RED_FM
+];
 
-const MarketShareByOriginChart = ({ city }) => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+const MarketShareByOriginChart = ({ data }) => {
+    const [chartData, setChartData] = useState([]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true); // Reset loading state on city change
-            try {
-                // API requires POST with city
-                const baseUrl = process.env.REACT_APP_API_BASE_URL || '';
-                const response = await axios.post(`${baseUrl}/market_share_by_origin`, { city: city || 'MUMBAI' });
-                // Response structure: { city: "MUMBAI", market_share: [{ Broadcaster: "...", "Market_Share_%": ... }] }
-                const chartData = response.data.market_share || [];
-                setData(chartData);
-                setLoading(false);
-            } catch (err) {
-                console.error("Error fetching market share by origin:", err);
-                setError("Failed to load data");
-                setLoading(false);
-                // Fallback to mock data
-                setData([
-                    { Broadcaster: 'BIG FM', 'Market_Share_%': 20 },
-                    { Broadcaster: 'RADIO CITY', 'Market_Share_%': 25 },
-                    { Broadcaster: 'RADIO MIRCHI', 'Market_Share_%': 30 },
-                    { Broadcaster: 'RED FM', 'Market_Share_%': 15 },
-                    { Broadcaster: 'MY FM', 'Market_Share_%': 10 },
-                ]);
-            }
-        };
-
-        if (city) {
-            fetchData();
+        if (data?.TOTAL_MARKET_SHARE_BY_CHANNEL) {
+            const formattedData = data.TOTAL_MARKET_SHARE_BY_CHANNEL.map(item => ({
+                Broadcaster: item.channel,
+                marketShare: item.percent,
+                seconds: item.seconds
+            }));
+            setChartData(formattedData);
         }
-    }, [city]);
+    }, [data]);
 
-    if (loading) {
+    if (!chartData.length) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+            <Box display="flex" justifyContent="center" alignItems="center" height={300}>
                 <CircularProgress />
             </Box>
         );
     }
 
-    if (error && data.length === 0) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
-                <Typography color="error">{error}</Typography>
-            </Box>
-        );
-    }
-
     return (
-        <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-                <Pie
-                    data={data}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    paddingAngle={5}
-                    dataKey="Market_Share_%"
-                    nameKey="Broadcaster"
-                >
-                    {data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-            </PieChart>
-        </ResponsiveContainer>
+        <Box display="flex" gap={4} alignItems="center">
+            
+            {/* ---------- PIE CHART SECTION ---------- */}
+            <Box flex={1}>
+            
+                <ResponsiveContainer width="100%" height={270}>
+                    <PieChart>
+                        <Pie
+                            data={chartData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={65}
+                            outerRadius={90}
+                            dataKey="marketShare"
+                            nameKey="Broadcaster"
+                            stroke="#fff"
+                            strokeWidth={2}
+                            paddingAngle={2}
+                        >
+                            {chartData.map((_, index) => (
+                                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                    </PieChart>
+                </ResponsiveContainer>
+            </Box>
+
+            {/* ---------- TABLE SECTION ---------- */}
+            <Box flex={1}>
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                    Broadcaster - Seconds
+                </Typography>
+
+                <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell><strong>BROADCASTER</strong></TableCell>
+                                <TableCell align="right"><strong>SECONDS</strong></TableCell>
+                                <TableCell align="right"><strong>MARKET SHARE</strong></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {chartData.map((row, idx) => (
+                                <TableRow key={idx}>
+                                    <TableCell>{row.Broadcaster}</TableCell>
+                                    <TableCell align="right">
+                                        {row.seconds?.toLocaleString() ?? "-"}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        {(row.marketShare ?? 0).toFixed(2)}%
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
+
+        </Box>
     );
 };
 

@@ -325,7 +325,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/upload" element={<UploadData />} />
               <Route path="/conversation" element={<ConversationView />} />
-              <Route path="/missed-clients" element={<MissedClients />} />
+              <Route path="/missedclients" element={<MissedClients />} />
             </Routes>
           </Box>
         </Box>

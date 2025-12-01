@@ -114,21 +114,23 @@ const CommonBarChart = ({
                     offset: 0,
                     style: { fill: "#04777e", fontSize: 12 },
                   }}
+                   angle={-20}  
+                   allowDecimals={false}
                 />
-                <Tooltip />
+                <Tooltip  formatter={(val, name, item) => {
+    const seconds = item?.payload?.seconds || 0;
+    return [
+      `Market Share: ${val}%\nSeconds: ${seconds.toLocaleString()}`,
+      ""
+    ];
+  }} />
                 <Bar
-                  dataKey="people"
+                  dataKey="value"
                   fill="#04777e"
                   barSize={20}
                   radius={[5, 5, 0, 0]}
                   cursor="pointer"
-                  onClick={(barData) => {
-                    if (barData && barData.name) {
-                      navigate(
-                        `/surgeries/filterValue/${filterDate}/${title}/${barData.name}`
-                      );
-                    }
-                  }}
+                 
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -145,7 +147,7 @@ const CommonBarChart = ({
               barCategoryGap="10%"
               barGap={0}
             >
-              <XAxis />
+              <XAxis  tick={false} axisLine={false}  />
               <YAxis
                 type="number"
                 tickLine={false}
