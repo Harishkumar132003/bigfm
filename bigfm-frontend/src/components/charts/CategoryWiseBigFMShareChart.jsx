@@ -3,7 +3,7 @@ import axios from "axios";
 import CommonBarChart from '../../commonComponent/commonBarchart';
 import { GET_CATEGORY_LIST } from '../../apiurls';
 
-const CategoryWiseBigFMShare = () => {
+const CategoryWiseBigFMShare = ({filters}) => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -11,7 +11,14 @@ const CategoryWiseBigFMShare = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(GET_CATEGORY_LIST);
+         const params = {};
+      if (filters.month) params.month = filters.month;
+      if (filters.year) params.year = filters.year;
+      if (filters.week) params.week = filters.week;
+
+        const res = await axios.get(GET_CATEGORY_LIST, {
+        params,
+      });
 
         const formatted = (res.data.records || []).map((item) => ({
           name: item.Category,
@@ -28,7 +35,7 @@ const CategoryWiseBigFMShare = () => {
     };
 
     fetchData();
-  }, []);
+  }, [filters]);
 
   if (loading) return <p>Loading...</p>;
 

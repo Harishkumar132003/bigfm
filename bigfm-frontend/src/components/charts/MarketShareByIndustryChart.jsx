@@ -7,7 +7,7 @@ import {
 import axios from 'axios';
 import { GET_UPSELL_OPPORTUNITIES } from '../../apiurls';
 
-const UpsellOpportunities = () => {
+const UpsellOpportunities = ({datefilter}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('category_final');
@@ -16,7 +16,13 @@ const UpsellOpportunities = () => {
   const fetchData = async (filterType) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${GET_UPSELL_OPPORTUNITIES}?type=${filterType}`);
+       const params = {};
+      if(filterType) params.type = filterType;
+      if (datefilter.month) params.month = datefilter.month;
+      if (datefilter.year) params.year = datefilter.year;
+      if (datefilter.week) params.week = datefilter.week;
+
+      const response = await axios.get(`${GET_UPSELL_OPPORTUNITIES}`,{params});
       setData(response.data.opportunities);
       setError(null);
     } catch (err) {
@@ -29,7 +35,7 @@ const UpsellOpportunities = () => {
 
   useEffect(() => {
     fetchData(filter);
-  }, [filter]);
+  }, [filter,datefilter]);
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);

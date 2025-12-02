@@ -21,6 +21,8 @@ import MarketShareByBroadcasterChart from './charts/MarketShareByBroadcasterChar
 import MarketShareStackedByOriginChart from './charts/MarketShareStackedByOriginChart';
 import { getdashboadsummary } from '../api';
 import CategoryWiseBigFMShareChart from './charts/CategoryWiseBigFMShareChart';
+import DashboardDatePicker from './DashboardDatePicker';
+import dayjs from 'dayjs';
 
 const originlist = [
   'Ahmedabad',
@@ -88,56 +90,73 @@ function StatCard({ title, value, caption, color }) {
 function Dashboard() {
   const [city, setCity] = useState(originlist[0]);
   const [bigfmdata, setBigfmdata] = useState({});
-  const [missedclient, setmissedclient] = useState({});
+  const [missedclient, setMissedclient] = useState({});
   const [dashboardData, setDashboardData] = useState(null);
+
+const [filters, setFilters] = useState({
+    broadcaster: 'BIG FM',
+    city: 'All Cities',
+     monthObj: null,
+  yearObj: null,  
+    month: null,
+    year: null,
+    week: '',
+  });
+
+   const handleFilterChange = (field, value) => {
+    if (field === "month" && value) {
+  const month = value.format("MMM");
+  const year = value.format("YYYY");
+  
+  console.log("Month:", month, "Year:", year);
+
+  setFilters((prev) => ({
+    ...prev,
+    month,
+    year ,monthObj: value// <- auto update year too
+  }));
+  return;
+}
+
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleCityChange = (event) => {
     setCity(event.target.value);
   };
 
+  const fetchDashboardData = async () => {
+  try {
+    
+
+    const response = await getdashboadsummary({ 
+      ...(filters.month && { month: filters.month }),
+      ...(filters.year && { year: filters.year }),
+      ...(filters.week && { week: filters.week }),
+    });
+    
+    const data = response.data;
+    console.log('Dashboard summary data:', data);
+
+    setMissedclient(data.MISSED_100_CLIENTS || {});
+    setBigfmdata(data.BIGFM_SUMMARY || {});
+    setDashboardData(data);
+  } catch (err) {
+    console.error('Error fetching dashboard summary:', err);
+  }
+};
+
   useEffect(() => {
-    // Fetch dashboard summary data
-    const fetchDashboardData = async () => {
-      try {
-        const response = await getdashboadsummary();
-        const data = response.data;
-        console.log('Dashboard summary data:', data);
-
-        // Set individual state for stats
-        setmissedclient(data.MISSED_100_CLIENTS || {});
-        setBigfmdata(data.BIGFM_SUMMARY || {});
-
-        // Set the complete data for charts
-        setDashboardData(data);
-      } catch (err) {
-        console.error('Error fetching dashboard summary:', err);
-        // You might want to set some error state here
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
+  fetchDashboardData();
+}, [filters]);
 
   return (
     <Stack spacing={3}>
-      {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                    <InputLabel id="city-select-label">City</InputLabel>
-                    <Select
-                        labelId="city-select-label"
-                        id="city-select"
-                        value={city}
-                        label="City"
-                        onChange={handleCityChange}
-                    >
-                        {originlist.map((c) => (
-                            <MenuItem key={c} value={c}>
-                                {c}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </Box> */}
+      <DashboardDatePicker
+      filters={filters}
+      handleFilterChange={handleFilterChange}
+  
+    />
 
       <Grid container spacing={2}>
         <Grid
@@ -192,7 +211,7 @@ function Dashboard() {
             <Typography variant='h6' sx={{ mb: 2 }}>
               Overall Market Share
             </Typography>
-            <MarketShareByOriginChart data={dashboardData} city={city} />
+            <MarketShareByOriginChart data={dashboardData} city={city} filters={filters} />
           </Paper>
         </Grid>
 
@@ -224,7 +243,7 @@ function Dashboard() {
             <Typography variant='h6' sx={{ mb: 2 }}>
               Category-wise BIG FM Market Share
             </Typography>
-            <CategoryWiseBigFMShareChart />
+            <CategoryWiseBigFMShareChart filters={filters} />
           </Paper>
         </Grid>
 
@@ -234,7 +253,7 @@ function Dashboard() {
             <Typography variant='h6' sx={{ mb: 2 }}>
               Station-wise Competitive Landscape
             </Typography>
-            <MarketShareStackedByOriginChart />
+            <MarketShareStackedByOriginChart filters={filters}/>
           </Paper>
         </Grid>
       </Grid>
@@ -244,7 +263,7 @@ function Dashboard() {
           <Typography variant='h6' sx={{ mb: 2 }}>
             Low Market Share{' '}
           </Typography>
-          <MarketShareByIndustryChart city={city} />
+          <MarketShareByIndustryChart city={city} datefilter={filters}/>
         </Paper>
       </Grid>
     </Stack>

@@ -18,6 +18,7 @@ export function getdashboadsummary(params) {
   return axios({
     method: "get",
     url: GET_DASHBOARD_SUMMARY,
+    params,
    
     // headers: {
     //   Authorization: authToken,

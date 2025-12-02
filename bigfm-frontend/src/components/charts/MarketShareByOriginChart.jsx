@@ -36,7 +36,7 @@ const COLORS = [
   '#03695fff',
 ];
 
-const MarketShareByOriginChart = ({ data }) => {
+const MarketShareByOriginChart = ({ data,filters }) => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -62,12 +62,17 @@ const MarketShareByOriginChart = ({ data }) => {
       setCachedOverall(formattedData);
       setChartData(formattedData);
     }
+    
 
-    axios.get(`${BASE_URL}/getMarketFilters`).then((res) => {
+    
+  }, [data,filters]);
+
+  useEffect(() => {
+axios.get(`${BASE_URL}/getMarketFilters`).then((res) => {
       setOrigins(res.data.origins);
       setProducts(res.data.products);
     });
-  }, [data]);
+  },[])
 
   // When dropdown changed → fetch chart data based on filter
   const fetchChartData = async (origin = ['All'], product = ['All']) => {
@@ -76,6 +81,9 @@ const MarketShareByOriginChart = ({ data }) => {
       const params = {};
       if (!origin.includes('All')) params.origin = origin.join(',');
       if (!product.includes('All')) params.product = product.join(',');
+      if (filters.month) params.month = filters.month;
+      if (filters.year) params.year = filters.year;
+      if (filters.week) params.week = filters.week;
 
       const res = await axios.get(`${BASE_URL}/getMarketShareChartData`, {
         params,
@@ -152,16 +160,23 @@ const MarketShareByOriginChart = ({ data }) => {
   }
 
   if (!chartData.length) {
-    return (
-      <Box
-        display='flex'
-        justifyContent='center'
-        alignItems='center'
-        height={350}
-      >
-        <CircularProgress />
-      </Box>
-    );
+      return (
+                <Box
+                    sx={{
+                        width: "100%",
+                        height: 450,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        bgcolor: "#f8f8f8",
+                        borderRadius: 2
+                    }}
+                >
+                    <Typography variant="h6" color="text.secondary">
+                        No Data Available
+                    </Typography>
+                </Box>
+            );
   }
 
   return (

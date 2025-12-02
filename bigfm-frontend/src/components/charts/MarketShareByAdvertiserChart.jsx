@@ -9,19 +9,34 @@ const TopMissedRegionsChart = ({ data }) => {
     const [chartData, setChartData] = useState([]);
 
     useEffect(() => {
-        if (data?.TOP_5_MISSED_REGIONS) {
+        if (data?.TOP_5_MISSED_REGIONS?.length > 0) {
             const formatted = data.TOP_5_MISSED_REGIONS.map(region => ({
                 station: region.station,
                 missed_seconds: region.missed_seconds,
             }));
             setChartData(formatted);
+        } else {
+            setChartData([]); // ensures state resets when no data
         }
     }, [data]);
 
+    // 🚫 Show "No Data" instead of loader
     if (!chartData.length) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
-                <CircularProgress />
+            <Box
+                sx={{
+                    width: "100%",
+                    height: 450,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    bgcolor: "#f8f8f8",
+                    borderRadius: 2
+                }}
+            >
+                <Typography variant="h6" color="text.secondary">
+                    No Data Available
+                </Typography>
             </Box>
         );
     }

@@ -1030,9 +1030,31 @@ def get_dashboard_summary():
 
 @dashboard_bp.route('/getUpsellOpportunities', methods=['GET'])
 def get_upsell_opportunities():
-    filter_type = request.args.get('type', 'category_final')  # category, station, or brand
+    filter_type = request.args.get('type', 'category_final')  # category_final, station, or brand
     limit = int(request.args.get('limit', 5))
-    
+
+    # 🔥 Accept dashboard filters
+    origin = request.args.get('origin')
+    month = request.args.get('month')
+    year = request.args.get('year')
+    week = request.args.get('week')
+
+    filters = "WHERE 1=1"
+    params = {}
+
+    if origin:
+        filters += " AND origin = :origin"
+        params["origin"] = origin
+    if month:
+        filters += " AND month = :month"
+        params["month"] = month
+    if year:
+        filters += " AND year = :year"
+        params["year"] = year
+    if week:
+        filters += " AND week = :week"
+        params["week"] = week
+
     base_sql = f"""
         WITH market_share AS (
             SELECT
@@ -1040,7 +1062,7 @@ def get_upsell_opportunities():
                 SUM(CASE WHEN channel_club = 'BIG FM' THEN seconds ELSE 0 END) AS bigfm_seconds,
                 SUM(seconds) AS total_seconds
             FROM advertiser_broadcaster_stats
-            WHERE {filter_type} IS NOT NULL
+            {filters}
             GROUP BY {filter_type}
             HAVING SUM(seconds) > 0
         )
@@ -1051,20 +1073,21 @@ def get_upsell_opportunities():
             (total_seconds - bigfm_seconds) AS missing_seconds
         FROM market_share
         WHERE 
-            (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) < 20
-            AND (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) > 0
-        ORDER BY missing_seconds ASC
+            (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) < 20   -- low share
+            AND (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) > 0  -- not 0% share
+        ORDER BY missing_seconds ASC  -- sorted ASC like you asked
         LIMIT :limit
     """
 
     engine = db._engine
     with engine.connect() as conn:
-        result = conn.execute(text(base_sql), {'limit': limit})
+        result = conn.execute(text(base_sql), {**params, "limit": limit})
         opportunities = [dict(row) for row in result.mappings()]
-    
+
     return jsonify({
-        'filter_type': filter_type,
-        'opportunities': opportunities
+        "filter_type": filter_type,
+        "filters_used": params,
+        "opportunities": opportunities
     })
 
 
