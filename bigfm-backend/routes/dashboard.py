@@ -1115,3 +1115,103 @@ def get_category_wise_bigfm_share():
         })
 
     return jsonify({"records": results})
+
+
+
+@dashboard_bp.route("/getMarketShareChartData", methods=["GET"])
+def get_market_share_chart_data():
+    origin = request.args.get("origin")
+    product = request.args.get("product")
+    month = request.args.get("month")
+    year = request.args.get("year")
+    week = request.args.get("week")
+
+    filters = "WHERE 1=1"
+    params = {}
+
+    # --- ORIGIN MULTI FILTER ---
+    if origin and origin != "All":
+        origin_list = origin.split(",")
+        origin_placeholder = ",".join([f":origin_{i}" for i in range(len(origin_list))])
+        filters += f" AND origin IN ({origin_placeholder})"
+        for i, val in enumerate(origin_list):
+            params[f"origin_{i}"] = val
+
+    # --- PRODUCT MULTI FILTER ---
+    if product and product != "All":
+        product_list = product.split(",")
+        product_placeholder = ",".join([f":product_{i}" for i in range(len(product_list))])
+        filters += f" AND brand_name IN ({product_placeholder})"
+        for i, val in enumerate(product_list):
+            params[f"product_{i}"] = val
+
+    # --- Additional filters ---
+    if month:
+        filters += " AND month = :month"
+        params["month"] = month
+    if year:
+        filters += " AND year = :year"
+        params["year"] = year
+    if week:
+        filters += " AND week = :week"
+        params["week"] = week
+
+    sql = f"""
+        SELECT
+            channel_club AS channel,
+            SUM(seconds) AS seconds
+        FROM advertiser_broadcaster_stats
+        {filters}
+        GROUP BY channel_club
+    """
+
+    engine = db._engine
+    with engine.connect() as conn:
+        rows = conn.execute(text(sql), params).mappings().all()
+
+    seconds_by_channel = {row["channel"]: float(row["seconds"] or 0) for row in rows}
+    total = sum(seconds_by_channel.values())
+
+    result = [
+        {"channel": ch, "seconds": sec, "percent": round((sec/total)*100, 2) if total else 0}
+        for ch, sec in seconds_by_channel.items()
+    ]
+
+    return jsonify({
+        "market_share": result,
+        "total_seconds": total,
+        "filters_received": {
+            "origin": origin or "All",
+            "product": product or "All",
+            "month": month,
+            "year": year,
+            "week": week
+        }
+    })
+
+
+@dashboard_bp.route("/getMarketFilters", methods=["GET"])
+def get_market_filters():
+    engine = db._engine
+    with engine.connect() as conn:
+
+        # ORIGIN list
+        origin_rows = conn.execute(text("""
+            SELECT DISTINCT origin
+            FROM advertiser_broadcaster_stats
+            WHERE origin IS NOT NULL AND origin != ''
+        """)).fetchall()
+        origins = ["All"] + [row[0] for row in origin_rows]
+
+        # PRODUCT list → If product does not exist, use brand_name
+        product_rows = conn.execute(text("""
+            SELECT DISTINCT brand_name
+            FROM advertiser_broadcaster_stats
+            WHERE brand_name IS NOT NULL AND brand_name != ''
+        """)).fetchall()
+        products = ["All"] + [row[0] for row in product_rows]
+
+    return jsonify({
+        "origins": origins,
+        "products": products
+    })
