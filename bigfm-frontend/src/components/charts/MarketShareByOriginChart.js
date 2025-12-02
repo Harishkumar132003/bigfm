@@ -60,7 +60,7 @@ const MarketShareByOriginChart = ({ data }) => {
                             strokeWidth={2}
                             paddingAngle={2}
                         >
-                            {chartData.map((_, index) => (
+                            {chartData?.map((_, index) => (
                                 <Cell key={index} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
@@ -82,7 +82,7 @@ const MarketShareByOriginChart = ({ data }) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {chartData.map((row, idx) => (
+                            {chartData?.map((row, idx) => (
                                 <TableRow key={idx}>
                                     <TableCell>{row.Broadcaster}</TableCell>
                                     <TableCell align="right">

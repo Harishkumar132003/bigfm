@@ -81,7 +81,7 @@ const UpsellOpportunities = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row, index) => (
+            {data?.map((row, index) => (
               <TableRow key={index}>
                 <TableCell>{row.name || 'N/A'}</TableCell>
                 <TableCell align="right">{row.market_share}%</TableCell>

@@ -232,7 +232,7 @@ const MissedClients = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                data.map((row, index) => (
+                data?.map((row, index) => (
                   <TableRow hover key={index}>
                     {columns.map((column) => {
                       const value = row[column.id];
