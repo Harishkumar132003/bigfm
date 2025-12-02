@@ -5,6 +5,7 @@ import {
   TableHead, TableRow, Typography, Chip, CircularProgress
 } from '@mui/material';
 import axios from 'axios';
+import { GET_UPSELL_OPPORTUNITIES } from '../../apiurls';
 
 const UpsellOpportunities = () => {
   const [data, setData] = useState([]);
@@ -15,7 +16,7 @@ const UpsellOpportunities = () => {
   const fetchData = async (filterType) => {
     try {
       setLoading(true);
-      const response = await axios.get(`/getUpsellOpportunities?type=${filterType}`);
+      const response = await axios.get(`${GET_UPSELL_OPPORTUNITIES}?type=${filterType}`);
       setData(response.data.opportunities);
       setError(null);
     } catch (err) {
