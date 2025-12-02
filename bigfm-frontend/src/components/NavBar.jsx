@@ -20,7 +20,7 @@ const drawerWidth = 280;
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: <DashboardOutlinedIcon /> },
-  { id: 'upload', label: 'UploadData', icon: <UploadFileIcon /> },
+  // { id: 'upload', label: 'UploadData', icon: <UploadFileIcon /> },
   { id: 'conversation', label: 'Conversation AI', icon: <ChatOutlinedIcon /> },
   {
     id: 'missedclients',
