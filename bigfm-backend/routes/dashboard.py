@@ -959,19 +959,20 @@ def get_dashboard_summary():
         bigfm_seconds = totals["BIG_FM"]
         bigfm_percent = round((bigfm_seconds / total_seconds_all) * 100, 2) if total_seconds_all else 0
 
-        # 2️⃣ MISSED CLIENTS (missed in at least one origin)
+        # 2️⃣ MISSED CLIENTS (client-level, no duplicate across origins)
         sql_missed = f"""
-            SELECT DISTINCT parent
+            SELECT parent
             FROM advertiser_broadcaster_stats
             {filters}
-            GROUP BY parent, origin
+            GROUP BY parent
             HAVING SUM(CASE WHEN channel_club = 'BIG FM' THEN seconds ELSE 0 END) = 0
         """
-        missed_parents = conn.execute(text(sql_missed), params).mappings().all()
-
-        missed_client_list = {r["parent"] for r in missed_parents}
+        missed_rows = conn.execute(text(sql_missed), params).mappings().all()
+        print(  len(missed_rows)  )
+        missed_client_list = [r["parent"] for r in missed_rows]
         total_missed_clients = len(missed_client_list)
 
+        # Get total missed seconds for these unique missed clients
         if missed_client_list:
             placeholders = ",".join([f":p{i}" for i in range(len(missed_client_list))])
             sql_missed_seconds = f"""
@@ -1000,7 +1001,7 @@ def get_dashboard_summary():
         """
         top_regions = conn.execute(text(sql_top_regions), params).mappings().all()
 
-    # 4️⃣ Prepare channel-wise marketshare for frontend
+    # 4️⃣ Prepare channel-wise market share for frontend
     market_share = [
         {
             "channel": ch,
@@ -1029,7 +1030,7 @@ def get_dashboard_summary():
 
 @dashboard_bp.route('/getUpsellOpportunities', methods=['GET'])
 def get_upsell_opportunities():
-    filter_type = request.args.get('type', 'category')  # category, station, or brand
+    filter_type = request.args.get('type', 'category_final')  # category, station, or brand
     limit = int(request.args.get('limit', 5))
     
     base_sql = f"""
@@ -1049,8 +1050,10 @@ def get_upsell_opportunities():
             total_seconds,
             (total_seconds - bigfm_seconds) AS missing_seconds
         FROM market_share
-        WHERE (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) < 20
-        ORDER BY missing_seconds DESC
+        WHERE 
+            (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) < 20
+            AND (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) > 0
+        ORDER BY missing_seconds ASC
         LIMIT :limit
     """
 

@@ -10,7 +10,7 @@ import { GET_UPSELL_OPPORTUNITIES } from '../../apiurls';
 const UpsellOpportunities = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('category');
+  const [filter, setFilter] = useState('category_final');
   const [error, setError] = useState(null);
 
   const fetchData = async (filterType) => {
@@ -36,7 +36,7 @@ const UpsellOpportunities = () => {
   };
 
   const filters = [
-    { key: 'category', label: 'By Category' },
+    { key: 'category_final', label: 'By Category' },
     { key: 'station', label: 'By Station' },
     { key: 'brand_name', label: 'By Brand' }
   ];
@@ -67,7 +67,11 @@ const UpsellOpportunities = () => {
             onClick={() => handleFilterChange(item.key)}
             color={filter === item.key ? 'primary' : 'default'}
             variant={filter === item.key ? 'filled' : 'outlined'}
-            sx={{ mb: 1 }}
+            sx={{ mb: 1 ,'&:hover': {
+      backgroundColor: filter === item.key ? '#e3eaf0ff !important' : 'transparent',
+      borderColor: 'currentColor', 
+      cursor: 'pointer'
+    }}}
           />
         ))}
       </Box>
@@ -76,7 +80,7 @@ const UpsellOpportunities = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><strong>{filter.toUpperCase()}</strong></TableCell>
+              <TableCell><strong>{filter === 'category_final' ? 'CATEGORY' : filter.toUpperCase()}</strong></TableCell>
               <TableCell align="right"><strong>MARKET SHARE</strong></TableCell>
               <TableCell align="right"><strong>TOTAL VOLUME</strong></TableCell>
             </TableRow>
