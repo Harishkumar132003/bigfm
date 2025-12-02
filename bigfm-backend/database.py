@@ -6,7 +6,11 @@ import os
 
 load_dotenv()
 
-DB_URL = "mysql+mysqlconnector://root:your_new_password@localhost:3306/bigfm"
+# DB_URL = "mysql+mysqlconnector://root:your_new_password@localhost:3306/bigfm"
+DB_URL = "mysql+mysqlconnector://bigfmuser:bigfmpassword@db:3306/bigfm"
+
+# DB_URL = f"mysql+mysqlconnector://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:3306/{os.getenv('DB_NAME')}"
+
 
 # LangChain SQL
 def init_database():

@@ -1,0 +1,25 @@
+# Node
+node_modules
+npm-debug.log
+yarn.lock
+.pnpm-store
+
+# Build outputs
+dist
+build
+
+# OS / editor junk
+.DS_Store
+*.swp
+*.log
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+frontend.Dockerfile
+backend.Dockerfile
+
+

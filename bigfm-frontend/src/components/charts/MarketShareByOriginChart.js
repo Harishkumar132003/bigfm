@@ -39,13 +39,15 @@ const MarketShareByOriginChart = ({ data }) => {
     }
 
     return (
-        <Box display="flex" gap={4} alignItems="center">
-            
-            {/* ---------- PIE CHART SECTION ---------- */}
-            <Box flex={1}>
-            
-                <ResponsiveContainer width="100%" height={270}>
-                    <PieChart>
+        <Box sx={{ width: '100%', height: 450 }}>
+            <Typography variant="subtitle1" sx={{ mb: 2, textAlign: 'center' }}>
+                Market Share by Channel
+            </Typography>
+            <Box display="flex" gap={4} alignItems="center" height="calc(100% - 40px)">
+                {/* ---------- PIE CHART SECTION ---------- */}
+                <Box flex={1} height="100%">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
                         <Pie
                             data={chartData}
                             cx="50%"
@@ -64,18 +66,14 @@ const MarketShareByOriginChart = ({ data }) => {
                         </Pie>
                         <Tooltip />
                         <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-                    </PieChart>
-                </ResponsiveContainer>
-            </Box>
+                        </PieChart>
+                    </ResponsiveContainer>
+                </Box>
 
-            {/* ---------- TABLE SECTION ---------- */}
-            <Box flex={1}>
-                <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                    Broadcaster - Seconds
-                </Typography>
-
-                <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-                    <Table size="small">
+                {/* ---------- TABLE SECTION ---------- */}
+                <Box flex={1} height="100%">
+                    <TableContainer component={Paper} sx={{ borderRadius: 2, maxHeight: 350, overflow: 'auto' }}>
+                        <Table size="small" stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell><strong>BROADCASTER</strong></TableCell>
@@ -96,10 +94,10 @@ const MarketShareByOriginChart = ({ data }) => {
                                 </TableRow>
                             ))}
                         </TableBody>
-                    </Table>
-                </TableContainer>
+                        </Table>
+                    </TableContainer>
+                </Box>
             </Box>
-
         </Box>
     );
 };

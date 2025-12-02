@@ -1,97 +1,75 @@
 
+version: '3.8'
+
+services:
   db:
     image: mysql:8
-    container_name: mysql_poc
+    container_name: mysql_bigfm
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: PassWord123
-      MYSQL_DATABASE: poc
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: bigfm
+      MYSQL_USER: bigfmuser
+      MYSQL_PASSWORD: bigfmpassword
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
-      - ./mysql:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
     networks:
-      - wizzgeeks-network
+      - bigfm-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pPassWord123"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$${MYSQL_USER}", "-p$${MYSQL_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 10
-
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: qdrant_vector_db
-    restart: always
-    ports:
-      - "6333:6333"
-      - "6334:6334"
-    volumes:
-      - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ["CMD", "true"]
-    networks:
-      - wizzgeeks-network
 
   backend:
     build:
       context: .
       dockerfile: backend.Dockerfile
-    container_name: flask_backend
-    restart: always
+    container_name: bigfm-backend
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
       DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: PassWord123
-      DB_NAME: poc
+      DB_PORT: 3306
+      DB_NAME: bigfm
+      DB_USER: bigfmuser
+      DB_PASSWORD: bigfmpassword
+      FLASK_ENV: production
+      FLASK_APP: app.py
     ports:
-      - "5002:5002"
+      - "5000:5000"
     volumes:
-      - ./src:/app/src  
+      - ./bigfm-backend:/app
     networks:
-      - wizzgeeks-network
+      - bigfm-network
 
-  userquery:
+  frontend:
     build:
       context: .
-      dockerfile: userbackend.Dockerfile
-    container_name: flask_userquery
-    restart: always
+      dockerfile: frontend.Dockerfile
+    container_name: bigfm-frontend
+    restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
-      qdrant:
-        condition: service_started
+      - backend
+    ports:
+      - "3000:3000"
     environment:
-      DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: PassWord123
-      DB_NAME: poc
-      QDRANT_URL: http://qdrant:6333
-      QDRANT_API_KEY: ""
-    ports:
-      - "5005:5005"
+      - REACT_APP_API_URL=http://localhost:5000
     volumes:
-      - ./userbackend:/app/userbackend
-      - ./uploads:/app/uploads
+      - ./bigfm-frontend:/app
+      - /app/node_modules
     networks:
-      - wizzgeeks-network
-  prophet:
-    build:
-      context: .
-      dockerfile: prophet.Dockerfile
-    container_name: prophet
-    restart: always
-    ports:
-      - "5001:5001"
-    networks:
-      - wizzgeeks-network
+      - bigfm-network
+
 volumes:
-  db_data:
-  qdrant_data:
+  mysql_data:
+  node_modules:
 
 networks:
-  wizzgeeks-network:
+  bigfm-network:
+    driver: bridge

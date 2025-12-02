@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import CommonBarChart from '../../commonComponent/commonBarchart';
+import { GET_CATEGORY_LIST } from '../../apiurls';
 
 const CategoryWiseBigFMShare = () => {
   const [chartData, setChartData] = useState([]);
@@ -10,8 +11,7 @@ const CategoryWiseBigFMShare = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const baseUrl = process.env.REACT_APP_API_BASE_URL || "";
-        const res = await axios.get(`${baseUrl}/getCategoryWiseBigFMShare`);
+        const res = await axios.get(GET_CATEGORY_LIST);
 
         const formatted = (res.data.records || []).map((item) => ({
           name: item.Category,
