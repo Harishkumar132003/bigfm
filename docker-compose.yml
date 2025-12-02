@@ -57,9 +57,9 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "80:80"
     environment:
-      - VITE_API_URL=http://3.110.83.27:5000
+      - VITE_API_URL=https://bigfm.wizzgeeks.com/api
     volumes:
       - ./bigfm-frontend:/app
       - /app/node_modules
