@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import ChartRenderer from './ChartRenderer'; // 🔥 you must import your renderer
 import { BASE_URL } from '../apiurls';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function ConversationView() {
   const usercode = "12345"; // keep same
@@ -163,9 +165,12 @@ export default function ConversationView() {
               >
                 {/* 🔥 Text */}
                 {m.type === 'text' && (
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {m.content}
-                  </Typography>
+                  <Box className="markdown">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                  </Box>
+                  // <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                  //   {m.content}
+                  // </Typography>
                 )}
 
                 {/* 🔥 Chart Support */}

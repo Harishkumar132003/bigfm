@@ -260,7 +260,7 @@ axios.get(`${BASE_URL}/getMarketFilters`).then((res) => {
                 ))}
               </Pie>
               <Tooltip />
-              <Legend />
+              <Legend  />
             </PieChart>
           </ResponsiveContainer>
         </Box>

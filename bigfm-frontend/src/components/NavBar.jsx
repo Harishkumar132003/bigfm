@@ -49,6 +49,7 @@ function NavBar() {
           background: 'linear-gradient(117deg, #4a9cda 0%, #0179d6 100%)',
           color: '#fff !important',
           boxShadow: '0px 2px 8px rgba(0, 120, 212, 0.15)',
+         
         })}
       >
         <Toolbar>
@@ -60,6 +61,7 @@ function NavBar() {
               color: '#fff',
               display: 'flex',
               alignItems: 'center',
+              justifyContent:'end'
             }}
           >
             <img

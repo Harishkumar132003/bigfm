@@ -9,7 +9,7 @@ dashboard_bp = Blueprint("dashboard_bp", __name__)
 @dashboard_bp.route('/getMissedclients', methods=['GET'])
 def get_missed_clients():
     channel_club = request.args.get("channel_club")   # FEVER, MY FM, BIG FM ...
-    station = request.args.get("station")
+    origin = request.args.get("origin")
     month = request.args.get("month")
     year = request.args.get("year")
     week = request.args.get("week")
@@ -26,9 +26,9 @@ def get_missed_clients():
     filters = "WHERE 1=1"
     params = {}
 
-    if station:
-        filters += " AND station = :station"
-        params["station"] = station
+    if origin:
+        filters += " AND origin = :origin"
+        params["origin"] = origin
 
     if month:
         filters += " AND month = :month"

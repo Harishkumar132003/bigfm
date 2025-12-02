@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import {
   Box,
   Paper,
@@ -19,9 +19,10 @@ import {
   Button,
 } from '@mui/material';
 import { DatePicker } from 'antd';
-import { originlist } from '../constant/constantValue';
 import { exportMissedClients } from '../api';
 import Close from '@mui/icons-material/Close';
+import axios from 'axios';
+import { BASE_URL } from '../apiurls';
 
 const WEEKS = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
 
@@ -36,7 +37,7 @@ const BROADCASTERS = [
 
 const columns = [
   { id: 'parent', label: 'Client Name', minWidth: 200 },
-  { id: 'station', label: 'City', minWidth: 100 },
+  { id: 'station', label: 'Origin', minWidth: 100 },
   { id: 'BIG_FM', label: 'BIG FM', minWidth: 80, align: 'center' },
   { id: 'FEVER', label: 'FEVER', minWidth: 80, align: 'center' },
   { id: 'MY_FM', label: 'MY FM', minWidth: 80, align: 'center' },
@@ -55,6 +56,7 @@ const columns = [
 
 const MissedClients = () => {
   const theme = useTheme();
+  const[originlist,setOrigins]=useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [data, setData] = useState([]);
@@ -63,7 +65,7 @@ const MissedClients = () => {
 
   const [filters, setFilters] = useState({
     broadcaster: 'BIG FM',
-    city: 'All Cities',
+    city: 'All',
      monthObj: null,
   yearObj: null,  
     month: null,
@@ -94,7 +96,7 @@ const MissedClients = () => {
   const handleResetFilters = () => {
     setFilters({
       broadcaster: 'BIG FM',
-      city: 'All Cities',
+      city: 'All',
       month: null,
       year: null,
       week: '',
@@ -108,11 +110,13 @@ const MissedClients = () => {
       channel_club: filters.broadcaster,
       page: page + 1,
       limit: rowsPerPage,
-      ...(filters.city && filters.city !== 'All Cities' && { station: filters.city }),
+      ...(filters.city && filters.city !== 'All' && { origin: filters.city }),
       ...(filters.month && { month: filters.month }),
       ...(filters.year && { year: filters.year }),
       ...(filters.week && { week: filters.week }),
     });
+
+  
 
     exportMissedClients(params)
       .then((response) => {
@@ -123,9 +127,16 @@ const MissedClients = () => {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
+  useEffect(() => { 
+     axios.get(`${BASE_URL}/getMarketFilters`).then((res) => {
+      setOrigins(res.data?.origins || []);
+    });
+  }, []);
+
+ useEffect(() => {
+ 
     fetchData();
-  }, [page, rowsPerPage, filters]);
+}, [page, rowsPerPage, filters]);
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
@@ -138,7 +149,7 @@ const MissedClients = () => {
           
           {/* CITY */}
           <Grid item xs={12} sm={6} md={3}>
-            <Typography fontSize="0.9rem" fontWeight={600} mb={1}>City</Typography>
+            <Typography fontSize="0.9rem" fontWeight={600} mb={1}>Origin</Typography>
             <TextField
               select
               fullWidth
@@ -146,14 +157,13 @@ const MissedClients = () => {
               onChange={(e) => handleFilterChange('city', e.target.value)}
               size="small"
               InputProps={{
-                endAdornment: filters.city !== 'All Cities' && (
-                  <IconButton size="small" onClick={() => handleFilterChange('city', 'All Cities')}>
+                endAdornment: filters.city !== 'All' && (
+                  <IconButton size="small" onClick={() => handleFilterChange('city', 'All')}>
                     <Close fontSize="small" />
                   </IconButton>
                 ),
               }}
             >
-              <MenuItem value="All Cities">All Cities</MenuItem>
               {originlist.map((city) => (
                 <MenuItem key={city} value={city}>{city}</MenuItem>
               ))}
@@ -167,7 +177,7 @@ const MissedClients = () => {
               picker="month"
               value={filters.monthObj}
               onChange={(v) => handleFilterChange('month', v)}
-              style={{ width: '100%' }}
+              style={{ width: '100%',height:'40px' }}
             />
           </Grid>
 

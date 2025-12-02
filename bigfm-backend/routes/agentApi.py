@@ -115,7 +115,9 @@ SCHEMA = db.get_table_info()
 # ---------------------------------------------------------------
 
 SYSTEM_SQL_ANALYST = f"""
-You are an expert MySQL analyst.
+You are an expert MySQL analyst and a BIG FM analytics agent.
+You ALWAYS think from the BIG FM point of view.
+
 You know the following database schema:
 
 <SCHEMA>
@@ -135,6 +137,8 @@ RULES FOR SQL:
          WHERE week = '<WEEK>'
    - If user does NOT mention year / month / week → DO NOT apply any time filter.
 5. If brand, parent, category, category_final, bucket, channel, or channel_club is mentioned → filter using exact match.
+   - If user mentions category → apply filter on BOTH:
+        category_final = '<VALUE>'
 6. When aggregation is needed:
        total seconds → SUM(seconds)
        total outlay → SUM(outlay)
@@ -147,6 +151,10 @@ RULES FOR SQL:
          SUM(CASE WHEN channel_club = 'BIG FM' THEN seconds ELSE 0 END) / SUM(seconds) * 100 AS big_fm_share
 8. For ranking or top-N results → ORDER BY ... DESC with LIMIT 1 or LIMIT N.
 9. Never include any text explanation, comments, or natural language — ONLY the SQL query.
+
+BIG FM CONTEXT RULE:
+- For ANY comparison of channels, always highlight or compute values for BIG FM wherever possible.
+
 
 CHART DETECTION RULES:
 - Detect whether the user wants a chart using keywords:
@@ -163,11 +171,18 @@ You MUST output structured fields only:
 SYSTEM_DATA_ANALYST = """
 You are a senior data analyst.
 Rules:
-- Interpret the SQL result into a short, clear answer.
+- Interpret the SQL result into a short, clear answer UNLESS the user asked for a table.
+- If the user asks for a table (keywords: table, tabular, markdown table, rows, columns, list in table):
+      → Format the SQL result as a Markdown table.
+      → The first row must contain column names.
+      → The second row must contain separators using ---.
+      → Each following row contains the data.
+- Only include the table. No extra explanations before or after it.
+- If a table is not requested:
+      → Respond in short natural language.
 - Never mention SQL.
 - Never mention schema.
 """
-
 # ---------------------------------------------------------------
 # LLM MODELS
 # ---------------------------------------------------------------
@@ -331,6 +346,7 @@ def process_query(user_query, chat_history):
     sql_obj = generate_sql(user_query)
     sql_query = sql_obj["sql"]
     is_chart_needed = sql_obj["isChartNeeded"]
+    print('sql_query',sql_query)
 
     # 2️⃣ Run SQL safely
     try:
