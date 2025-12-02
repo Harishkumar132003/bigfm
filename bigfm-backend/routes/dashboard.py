@@ -953,25 +953,40 @@ def get_dashboard_summary():
             {filters}
         """
         totals = conn.execute(text(sql_total), params).mappings().first()
-
-        # Convert all to floats to avoid Decimal crash
         totals = {k: float(v or 0) for k, v in totals.items()}
 
         total_seconds_all = sum(totals.values())
         bigfm_seconds = totals["BIG_FM"]
         bigfm_percent = round((bigfm_seconds / total_seconds_all) * 100, 2) if total_seconds_all else 0
 
-        # 2️⃣ MISSED 100% CLIENTS (BIG FM share = 0)
+        # 2️⃣ MISSED CLIENTS (missed in at least one origin)
         sql_missed = f"""
-            SELECT parent, SUM(seconds) AS total_sec
+            SELECT DISTINCT parent
             FROM advertiser_broadcaster_stats
             {filters}
-            GROUP BY parent
+            GROUP BY parent, origin
             HAVING SUM(CASE WHEN channel_club = 'BIG FM' THEN seconds ELSE 0 END) = 0
         """
-        missed_rows = conn.execute(text(sql_missed), params).mappings().all()
-        total_missed_clients = len(missed_rows)
-        missed_seconds_total = sum(float(r["total_sec"]) for r in missed_rows)
+        missed_parents = conn.execute(text(sql_missed), params).mappings().all()
+
+        missed_client_list = {r["parent"] for r in missed_parents}
+        total_missed_clients = len(missed_client_list)
+
+        if missed_client_list:
+            placeholders = ",".join([f":p{i}" for i in range(len(missed_client_list))])
+            sql_missed_seconds = f"""
+                SELECT SUM(seconds) AS sec
+                FROM advertiser_broadcaster_stats
+                {filters} AND parent IN ({placeholders})
+            """
+            sec_params = params.copy()
+            for i, p in enumerate(missed_client_list):
+                sec_params[f"p{i}"] = p
+
+            row = conn.execute(text(sql_missed_seconds), sec_params).mappings().first()
+            missed_seconds_total = float(row["sec"] or 0)
+        else:
+            missed_seconds_total = 0
 
         # 3️⃣ TOP 5 MISSED REGIONS BY STATION
         sql_top_regions = f"""
@@ -985,11 +1000,15 @@ def get_dashboard_summary():
         """
         top_regions = conn.execute(text(sql_top_regions), params).mappings().all()
 
-    # Prepare channel-wise marketshare for frontend
-    market_share = []
-    for ch, sec in totals.items():
-        pct = round((sec / total_seconds_all) * 100, 2) if total_seconds_all else 0
-        market_share.append({"channel": ch, "seconds": sec, "percent": pct})
+    # 4️⃣ Prepare channel-wise marketshare for frontend
+    market_share = [
+        {
+            "channel": ch,
+            "seconds": sec,
+            "percent": round((sec / total_seconds_all) * 100, 2) if total_seconds_all else 0
+        }
+        for ch, sec in totals.items()
+    ]
 
     return jsonify({
         "BIGFM_SUMMARY": {
