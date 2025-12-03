@@ -16,6 +16,8 @@ import Dashboard from './components/Dashboard';
 import UploadData from './components/uploadData';
 import ConversationView from './components/chatPage';
 import MissedClients from './components/missedclients';
+import { AppBar, Drawer, IconButton, Toolbar, useMediaQuery } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const drawerWidth = 280;
 
@@ -300,24 +302,88 @@ function App() {
     }),
   []
 );
+const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 900px)');
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
-  return (
+ return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-          <NavBar  />
+          
+          {/* Mobile Drawer */}
+          {isMobile && (
+            <Drawer
+              variant="temporary"
+              open={mobileOpen}
+              onClose={handleDrawerToggle}
+              ModalProps={{ keepMounted: true }}
+              sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
+            >
+              <NavBar onNavigate={() => setMobileOpen(false)} isMobile={isMobile} />
+            </Drawer>
+          )}
 
+          {/* Desktop Sidebar */}
+          
+          {!isMobile && (
+            <Box sx={{ width: drawerWidth, flexShrink: 0 }}>
+              <NavBar />
+            </Box>
+          )}
+
+          {/* Top Bar only for mobile */}
+          {isMobile && (
+            <AppBar position="fixed">
+              <Toolbar>
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="start"
+                  onClick={handleDrawerToggle}
+                  sx={{ mr: 2 }}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Typography
+            variant='h6'
+            sx={{
+              flexGrow: 1,
+              fontWeight: 700,
+              color: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent:'end'
+            }}
+          >
+            <img
+              src='/wizzgeeks.png'
+              alt='logo'
+              style={{
+                width: '40px',
+                height: '23px',
+                verticalAlign: 'middle',
+                marginRight: '10px',
+              }}
+            />
+            Powered By Wizzgeeks
+          </Typography>
+              </Toolbar>
+            </AppBar>
+          )}
+
+          {/* Main Content */}
           <Box
             component="main"
             sx={{
               flexGrow: 1,
-              ml: `${drawerWidth}px`,
               px: 3,
-              pt: 10,
-              pb: 6,
-              height: '100vh',
-              overflow: 'auto',
+              pt: isMobile ? 10 : 3,
+             
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              mt:{md:'64px'}
             }}
           >
             <Routes>

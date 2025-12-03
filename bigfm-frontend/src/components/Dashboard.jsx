@@ -158,12 +158,12 @@ const [filters, setFilters] = useState({
   
     />
 
-      <Grid container spacing={2}>
+      <Grid container spacing={2} width={"100%"}>
         <Grid
           item
           xs={12}
           md={4}
-          sx={{ display: 'flex', alignItems: 'stretch', width: '100%' }}
+          sx={{ display: 'flex', alignItems: 'stretch', width: {xs:'100%', sm:'100%'},pl: { xs: '0px !important', sm: '0px !important',md:'20px !important' } }}
         >
           <StatCard
             title='Market Share'
@@ -178,7 +178,7 @@ const [filters, setFilters] = useState({
           item
           xs={12}
           md={4}
-          sx={{ display: 'flex', alignItems: 'stretch' }}
+          sx={{ display: 'flex', alignItems: 'stretch',width: {xs:'100%', sm:'100%'},pl: { xs: '0px !important', sm: '0px !important',md:'20px !important' } }}
         >
           <StatCard
             title='Missed Client Seconds'
@@ -193,7 +193,7 @@ const [filters, setFilters] = useState({
           item
           xs={12}
           md={4}
-          sx={{ display: 'flex', alignItems: 'stretch' }}
+          sx={{ display: 'flex', alignItems: 'stretch', width: {xs:'100%', sm:'100%'},pl: { xs: '0px !important', sm: '0px !important',md:'20px !important' } }}
         >
           <StatCard
             title='Total Missed Clients'
@@ -204,9 +204,10 @@ const [filters, setFilters] = useState({
         </Grid>
       </Grid>
 
-      <Grid container spacing={2}>
+      <Grid container spacing={2}           sx={{  width: {xs:'100%', sm:'100%'} }}
+ >
         {/* Market Share by Origin (Donut/Pie) */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} sx={{ pl: { xs: '0px !important', sm: '0px !important',md:'12px !important' } }}>
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, minHeight: 400 }}>
             <Typography variant='h6' sx={{ mb: 2 }}>
               Overall Market Share
@@ -216,7 +217,7 @@ const [filters, setFilters] = useState({
         </Grid>
 
         {/* Market Share Distribution (Stacked Bar) */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} sx={{ pl: { xs: '0px !important', sm: '0px !important',md:'12px !important'  } }}>
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, minHeight: 400 }}>
             <Typography variant='h6' sx={{ mb: 2 }}>
               {' '}
@@ -229,7 +230,7 @@ const [filters, setFilters] = useState({
         {/* Market Share by Industry (Vertical Stacked Bar) */}
 
         {/* Market Share by Broadcaster (Line or Vertical Bar) */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} sx={{ pl: { xs: '0px !important', sm: '0px !important',md:'12px !important'  } }}>
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, minHeight: 350,height: '100%' }}>
             <Typography variant='h6' sx={{ mb: 2 }}>
               Weekly Market Share Trend
@@ -238,7 +239,7 @@ const [filters, setFilters] = useState({
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} sx={{ pl: { xs: '0px !important', sm: '0px !important',md:'12px !important'  } }}>
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, minHeight: 350 }}>
             <Typography variant='h6' sx={{ mb: 2 }}>
               Category-wise BIG FM Market Share
@@ -248,7 +249,7 @@ const [filters, setFilters] = useState({
         </Grid>
 
         {/* Market Share Stacked by Origin (100% Stacked Column) */}
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ pl: { xs: '0px !important', sm: '0px !important',md:'12px !important'  } }}>
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, minHeight: 350 }}>
             <Typography variant='h6' sx={{ mb: 2 }}>
               Station-wise Competitive Landscape
@@ -258,7 +259,7 @@ const [filters, setFilters] = useState({
         </Grid>
       </Grid>
 
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} md={6} sx={{ pl: { xs: '0px !important', sm: '0px !important',md:'12px !important'  } }}>
         <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, minHeight: 350 }}>
           <Typography variant='h6' sx={{ mb: 2 }}>
             Low Market Share{' '}

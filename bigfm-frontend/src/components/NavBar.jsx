@@ -30,11 +30,14 @@ const navItems = [
 
 ];
 
-function NavBar() {
+function NavBar({onNavigate,isMobile}) {
   const nav = useNavigate();
   const path = window.location.pathname.split('/')[1];
   const [active, setActive] = useState(path.length ? path : 'dashboard');
   const handleNavClick = (id) => {
+    if(onNavigate) {
+      onNavigate()
+    }
     setActive(id);
     nav(`/${id}`);
   };
@@ -53,7 +56,7 @@ function NavBar() {
          
         })}
       >
-        <Toolbar>
+        {!isMobile && <Toolbar>
           <Typography
             variant='h6'
             sx={{
@@ -77,7 +80,7 @@ function NavBar() {
             />
             Powered By Wizzgeeks
           </Typography>
-        </Toolbar>
+        </Toolbar>}
       </AppBar>
 
       <Drawer

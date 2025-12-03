@@ -16,17 +16,16 @@ const TopMissedRegionsChart = ({ data }) => {
             }));
             setChartData(formatted);
         } else {
-            setChartData([]); // ensures state resets when no data
+            setChartData([]);
         }
     }, [data]);
 
-    // 🚫 Show "No Data" instead of loader
     if (!chartData.length) {
         return (
             <Box
                 sx={{
                     width: "100%",
-                    height: 450,
+                    height: { xs: 300, md: 450 },
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
@@ -42,24 +41,46 @@ const TopMissedRegionsChart = ({ data }) => {
     }
 
     return (
-        <Box sx={{ width: '100%', height: 450 }}>
-            <Typography variant="subtitle1" sx={{ mb: 2, textAlign: 'center' }}>
+        <Box sx={{ width: "100%", height: { xs: 320, sm: 360, md: 450 } }}>
+            <Typography
+                variant="subtitle1"
+                sx={{
+                    mb: 2,
+                    textAlign: "center",
+                    fontSize: { xs: "0.95rem", md: "1.1rem" }
+                }}
+            >
                 Top Missed Regions
             </Typography>
-            <Box sx={{ height: 'calc(100% - 40px)' }}>
+
+            <Box sx={{ height: { xs: "calc(100% - 40px)" } }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
-                        margin={{ top: 20, right: 30, left: 100, bottom: 20 }}
+                        margin={{
+                            top: 20,
+                            right: 10,
+                            left: 10,
+                            bottom: 20
+                        }}
                     >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="station" />
-                        <YAxis type="number" />
+                        <XAxis
+                            dataKey="station"
+                            tick={{ fontSize: 10 }}
+                            interval={0}
+                            angle={window.innerWidth < 600 ? -35 : 0}   // label tilt on small screens
+                            textAnchor="end"
+                        />
+                        <YAxis
+                            type="number"
+                            tick={{ fontSize: 11 }}
+                        />
                         <Tooltip formatter={(val) => val.toLocaleString()} />
                         <Bar
                             dataKey="missed_seconds"
                             fill="#ff7043"
-                            barSize={50}
+                            barSize={window.innerWidth < 600 ? 28 : 50} // smaller bars on mobile
                             radius={[4, 4, 0, 0]}
                         />
                     </BarChart>
