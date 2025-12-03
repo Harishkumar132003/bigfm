@@ -122,7 +122,7 @@ const CommonBarChart = ({
     return [
       `Market Share: ${val}%\nSeconds: ${seconds.toLocaleString()}`,
       ""
-    ];
+    ]
   }} />
                 <Bar
                   dataKey="value"

@@ -960,6 +960,7 @@ def get_dashboard_summary():
         bigfm_percent = round((bigfm_seconds / total_seconds_all) * 100, 2) if total_seconds_all else 0
 
         # 2️⃣ MISSED CLIENTS (client-level, no duplicate across origins)
+        
         sql_missed = f"""
             SELECT parent
             FROM advertiser_broadcaster_stats
@@ -991,14 +992,22 @@ def get_dashboard_summary():
 
         # 3️⃣ TOP 5 MISSED REGIONS BY STATION
         sql_top_regions = f"""
-            SELECT station, SUM(seconds) AS missed_sec
-            FROM advertiser_broadcaster_stats
-            {filters}
-            GROUP BY station
-            HAVING SUM(CASE WHEN channel_club = 'BIG FM' THEN seconds ELSE 0 END) = 0
-            ORDER BY missed_sec DESC
-            LIMIT 5
-        """
+    SELECT
+        station,
+        count(distinct brand_name)
+          - count(distinct case when channel_club = 'BIG FM' then brand_name end)
+          as missed_client_count,
+        sum(seconds)
+          - sum(case when channel_club = 'BIG FM' then seconds else 0 end)
+          as missed_seconds
+    FROM advertiser_broadcaster_stats
+    {filters}
+    GROUP BY station
+    HAVING missed_client_count > 0              -- BIG FM misses at least 1 brand
+    ORDER BY missed_client_count DESC,         -- primary rank: missed client count
+             missed_seconds DESC               -- tie-break: missed competitor volume
+    LIMIT 5
+"""
         top_regions = conn.execute(text(sql_top_regions), params).mappings().all()
 
     # 4️⃣ Prepare channel-wise market share for frontend
@@ -1022,9 +1031,14 @@ def get_dashboard_summary():
         },
         "TOTAL_MARKET_SHARE_BY_CHANNEL": market_share,
         "TOP_5_MISSED_REGIONS": [
-            {"station": r["station"], "missed_seconds": float(r["missed_sec"])}
-            for r in top_regions
-        ]
+    {
+        "station": r["station"],
+        "missed_client_count": int(r["missed_client_count"]),
+        "missed_seconds": float(r["missed_seconds"])
+    }
+    for r in top_regions
+]
+
     })
 
 
@@ -1034,7 +1048,7 @@ def get_upsell_opportunities():
     limit = int(request.args.get('limit', 5))
 
     # 🔥 Accept dashboard filters
-    origin = request.args.get('origin')
+    station = request.args.get('station')
     month = request.args.get('month')
     year = request.args.get('year')
     week = request.args.get('week')
@@ -1042,9 +1056,9 @@ def get_upsell_opportunities():
     filters = "WHERE 1=1"
     params = {}
 
-    if origin:
-        filters += " AND origin = :origin"
-        params["origin"] = origin
+    if station:
+        filters += " AND station = :station"
+        params["station"] = station
     if month:
         filters += " AND month = :month"
         params["month"] = month
@@ -1072,10 +1086,8 @@ def get_upsell_opportunities():
             total_seconds,
             (total_seconds - bigfm_seconds) AS missing_seconds
         FROM market_share
-        WHERE 
-            (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) < 20   -- low share
-            AND (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) > 0  -- not 0% share
-        ORDER BY missing_seconds ASC  -- sorted ASC like you asked
+        WHERE (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) > 0
+ORDER BY (bigfm_seconds * 100.0) / NULLIF(total_seconds, 0) ASC
         LIMIT :limit
     """
 

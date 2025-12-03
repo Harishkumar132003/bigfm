@@ -1,5 +1,5 @@
 import { alpha, Avatar, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import axios from 'axios';
 import ChartRenderer from './ChartRenderer'; // 🔥 you must import your renderer
 import { BASE_URL } from '../apiurls';
@@ -14,6 +14,14 @@ export default function ConversationView() {
   const [error, setError] = useState('');
 
   const historyLoaded = useRef(false);
+  const bottomRef = useRef(null);
+
+
+
+  useLayoutEffect(() => {
+  const el = bottomRef.current;
+  if (el) el.scrollTop = el.scrollHeight;
+}, [messages]);
 
   // ------------------ LOAD CHAT HISTORY ------------------
   useEffect(() => {
@@ -149,7 +157,7 @@ export default function ConversationView() {
       
 
       {/* MESSAGES */}
-      <Stack spacing={1.5} sx={{ pb: 6, height: 'calc(100% - 123px)', overflowY: 'auto' }}>
+      <Stack spacing={1.5} sx={{ pb: 6, height: 'calc(100% - 123px)', overflowY: 'auto' }} ref={bottomRef}>
         {messages.map((m) => (
           <Box key={m.id} sx={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <Stack direction="row" spacing={1} sx={{ maxWidth: '72%' }}>
@@ -180,6 +188,7 @@ export default function ConversationView() {
             </Stack>
           </Box>
         ))}
+        
       </Stack>
 
       {/* INPUT */}
