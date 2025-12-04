@@ -302,76 +302,19 @@ function App() {
     }),
   []
 );
-const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 900px)');
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
- return (
+  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-          
-          {/* Mobile Drawer */}
-          {isMobile && (
-            <Drawer
-              variant="temporary"
-              open={mobileOpen}
-              onClose={handleDrawerToggle}
-              ModalProps={{ keepMounted: true }}
-              sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
-            >
-              <NavBar onNavigate={() => setMobileOpen(false)} isMobile={isMobile} />
-            </Drawer>
-          )}
-
-          {/* Desktop Sidebar */}
-          
-          {!isMobile && (
-            <Box sx={{ width: drawerWidth, flexShrink: 0 }}>
-              <NavBar />
-            </Box>
-          )}
-
-          {/* Top Bar only for mobile */}
-          {isMobile && (
-            <AppBar position="fixed">
-              <Toolbar>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="start"
-                  onClick={handleDrawerToggle}
-                  sx={{ mr: 2 }}
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Typography
-            variant='h6'
-            sx={{
-              flexGrow: 1,
-              fontWeight: 700,
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent:'end'
-            }}
-          >
-            <img
-              src='/wizzgeeks.png'
-              alt='logo'
-              style={{
-                width: '40px',
-                height: '23px',
-                verticalAlign: 'middle',
-                marginRight: '10px',
-              }}
-            />
-            Powered By Wizzgeeks
-          </Typography>
-              </Toolbar>
-            </AppBar>
-          )}
+          <NavBar 
+            isMobile={isMobile} 
+            onNavigate={handleDrawerToggle} 
+          />
 
           {/* Main Content */}
           <Box
@@ -379,11 +322,13 @@ const [mobileOpen, setMobileOpen] = useState(false);
             sx={{
               flexGrow: 1,
               px: 3,
-              pt: isMobile ? 10 : 3,
-             height:{ xs: '100vh', sm: '100vh', md: 'unset' },
+              pt: isMobile ? 8 : 3,
+              height: '100vh',
               overflowY: 'auto',
               overflowX: 'hidden',
-              mt:{md:'64px'}
+              mt: isMobile ? 0 : '64px',
+              width: isMobile ? '100%' : `calc(100% - ${drawerWidth}px)`,
+              transition: 'margin 0.3s ease-in-out',
             }}
           >
             <Routes>

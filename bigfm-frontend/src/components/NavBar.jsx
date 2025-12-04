@@ -16,6 +16,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import PersonOffOutlinedIcon from '@mui/icons-material/PersonOffOutlined';
 import { useNavigate } from 'react-router-dom';
+import { Box } from '@mui/material';
 const drawerWidth = 280;
 
 const navItems = [
@@ -30,16 +31,25 @@ const navItems = [
 
 ];
 
-function NavBar({onNavigate,isMobile}) {
+function NavBar({onNavigate, isMobile}) {
   const nav = useNavigate();
   const path = window.location.pathname.split('/')[1];
   const [active, setActive] = useState(path.length ? path : 'dashboard');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(!isMobile);
+  
   const handleNavClick = (id) => {
     if(onNavigate) {
       onNavigate()
     }
     setActive(id);
     nav(`/${id}`);
+    if (isMobile) {
+      setIsDrawerOpen(false);
+    }
+  };
+
+  const toggleDrawer = () => {
+    setIsDrawerOpen(!isDrawerOpen);
   };
 
   return (
@@ -48,52 +58,132 @@ function NavBar({onNavigate,isMobile}) {
         position='fixed'
         sx={(t) => ({
           zIndex: t.zIndex.drawer + 1,
-          width: `calc(100% - ${drawerWidth}px)`,
-          ml: `${drawerWidth}px`,
+          width: isMobile ? '100%' : `calc(100% - ${drawerWidth}px)`,
+          ml: isMobile ? 0 : `${drawerWidth}px`,
           background: 'linear-gradient(117deg, #4a9cda 0%, #0179d6 100%)',
           color: '#fff !important',
           boxShadow: '0px 2px 8px rgba(0, 120, 212, 0.15)',
-         
         })}
       >
-        {!isMobile && <Toolbar>
-          <Typography
-            variant='h6'
-            sx={{
-              flexGrow: 1,
-              fontWeight: 700,
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent:'end'
-            }}
-          >
+        <Toolbar sx={{ 
+          justifyContent: isMobile ? 'space-between' : 'flex-end',
+          minHeight: '64px !important',
+          px: isMobile ? 2 : 3
+        }}>
+          {isMobile && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <div 
+                onClick={toggleDrawer}
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-around',
+                  cursor: 'pointer',
+                  zIndex: 1300
+                }}
+              >
+                <span style={{
+                  display: 'block',
+                  width: '100%',
+                  height: '2px',
+                  backgroundColor: '#fff',
+                  transition: 'all 0.3s ease-in-out',
+                  transform: isDrawerOpen ? 'rotate(45deg) translate(6px, 5px)' : 'none',
+                  opacity: isDrawerOpen ? 1 : 1
+                }}></span>
+                <span style={{
+                  display: 'block',
+                  width: '100%',
+                  height: '2px',
+                  backgroundColor: '#fff',
+                  transition: 'all 0.3s ease-in-out',
+                  opacity: isDrawerOpen ? 0 : 1,
+                  transform: isDrawerOpen ? 'translateX(-20px)' : 'none'
+                }}></span>
+                <span style={{
+                  display: 'block',
+                  width: '100%',
+                  height: '2px',
+                  backgroundColor: '#fff',
+                  transition: 'all 0.3s ease-in-out',
+                  transform: isDrawerOpen ? 'rotate(-45deg) translate(6px, -5px)' : 'none',
+                  opacity: isDrawerOpen ? 1 : 1
+                }}></span>
+              </div>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <img
+                  src='/bigfmlogo.png'
+                  alt='BigFM Logo'
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    objectFit: 'contain'
+                  }}
+                />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    lineHeight: 1
+                  }}
+                >
+                  BigFM
+                </Typography>
+              </Box>
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <img
               src='/wizzgeeks.png'
-              alt='logo'
+              alt='Wizzgeeks Logo'
               style={{
-                width: '40px',
-                height: '23px',
-                verticalAlign: 'middle',
-                marginRight: '10px',
+                width: isMobile ? '35px' : '40px',
+                height: isMobile ? '20px' : '23px',
+                objectFit: 'contain',
               }}
             />
-            Powered By Wizzgeeks
-          </Typography>
-        </Toolbar>}
+            {!isMobile && (
+              <Typography
+                variant='h6'
+                sx={{
+                  fontWeight: 700,
+                  color: '#fff',
+                  fontSize: isMobile ? '0.9rem' : '1rem',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Powered By Wizzgeeks
+              </Typography>
+            )}
+          </Box>
+        </Toolbar>
       </AppBar>
 
       <Drawer
-        variant='permanent'
+        variant={isMobile ? 'temporary' : 'permanent'}
+        open={isMobile ? isDrawerOpen : true}
+        onClose={toggleDrawer}
         anchor='left'
-        PaperProps={{
-          sx: (t) => ({
+        transitionDuration={300}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
             borderRight: '1px solid',
             borderColor: 'divider',
-            background: t.palette.background.paper,
-          }),
+            transition: 'transform 0.3s ease-in-out',
+            transform: isMobile && !isDrawerOpen ? `translateX(-${drawerWidth}px)` : 'none',
+            position: isMobile ? 'fixed' : 'relative',
+            height: '100%',
+            zIndex: 1200,
+          },
         }}
       >
         <Toolbar sx={{ px: 2, gap: 1 }}>
