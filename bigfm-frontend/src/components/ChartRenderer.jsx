@@ -1,6 +1,7 @@
 import React from "react";
 import Plot from "react-plotly.js";
 import Plotly from "plotly.js-dist-min";
+import { Box } from '@mui/material';
 
 const ChartRenderer = ({ data }) => {
   const parsedChart = data?.chart ? data.chart : data;
@@ -26,13 +27,23 @@ const ChartRenderer = ({ data }) => {
   // ------------------------------------------
   // BASE LAYOUT
   // ------------------------------------------
+  const wrapTitle = (text, maxWordsPerLine = 5) => {
+  if (!text) return "";
+  const words = text.split(" ");
+  let result = [];
+  for (let i = 0; i < words.length; i += maxWordsPerLine) {
+    result.push(words.slice(i, i + maxWordsPerLine).join(" "));
+  }
+  return result.join("<br>");
+};
   const layout = {
     title: {
-      text: title,
+      text: wrapTitle(title),
       x: 0.5,
       xanchor: "center",
-      font: { size: 18, weight: "bold" }
+      font: { size: 18, weight: "bold",}
     },
+    margin: { t: 60, b: 30, l: 20, r: 20 },
     paper_bgcolor: "transparent",
     plot_bgcolor: "transparent",
     autosize: true
@@ -150,6 +161,12 @@ const ChartRenderer = ({ data }) => {
   }
 
   return (
+    <Box
+    sx={{
+      width: "100%",
+      height: { xs: 260, sm: 300, md: 360 }, // responsive height
+    }}
+  >
     <Plot
       data={plotData}
       layout={layout}
@@ -157,10 +174,13 @@ const ChartRenderer = ({ data }) => {
       onInitialized={(figure, graphDiv) => {
         graphDiv._fullLayout._plotly = Plotly;
       }}
+       style={{ width: "100%", height: "100%" }}  
       onUpdate={(figure, graphDiv) => {
         graphDiv._fullLayout._plotly = Plotly;
       }}
+      useResizeHandler
     />
+    </Box>
   );
 };
 

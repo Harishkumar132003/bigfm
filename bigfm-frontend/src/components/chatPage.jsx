@@ -147,7 +147,7 @@ export default function ConversationView() {
 
   // ------------------ UI ------------------
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height:{md:'unset !important' ,sm:'calc(100% - 17px)',xs:'calc(100% - 17px)'}  }}>
       <Typography variant="h6" sx={{ mb: 1 ,display:'flex', alignItems:'center',gap:0.5}}>
         Conversation
         <Typography variant="body2" color="text.secondary">
@@ -157,11 +157,15 @@ export default function ConversationView() {
       
 
       {/* MESSAGES */}
-      <Stack spacing={1.5} sx={{ pb: 6, height: 'calc(100% - 123px)', overflowY: 'auto' }} ref={bottomRef}>
+      <Stack spacing={1.5} sx={{ pb: 6, height: 'calc(100vh - 225px)', overflowY: 'auto' }} ref={bottomRef}>
         {messages.map((m) => (
           <Box key={m.id} sx={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-            <Stack direction="row" spacing={1} sx={{ maxWidth: '72%' }}>
-              {m.role === 'ai' && <Avatar sx={{ bgcolor: 'primary.main' }}>AI</Avatar>}
+            <Stack direction="row" spacing={1} sx={{ maxWidth: {md:'72%'}, width:{ xs:'100%',sm:'100%',md:'100%'  },  justifyContent: {
+      xs: 'center', 
+      sm: 'center', 
+      md: m.role === "user" ? 'flex-end' : 'flex-start'   // apply only on md+
+    } }}>
+              {m.role === 'ai' && <Avatar sx={{ bgcolor: 'primary.main',display:{xs:'none',sm:'none',md:'flex'} }}>AI</Avatar>}
               <Paper
                 sx={(t) => ({
                   p: 1.5,
@@ -169,6 +173,10 @@ export default function ConversationView() {
                   bgcolor: m.role === 'user' ? alpha(t.palette.primary.main, 0.08) : t.palette.background.paper,
                   border: '1px solid',
                   borderColor: m.role === 'user' ? alpha(t.palette.primary.main, 0.25) : 'divider',
+                   width:
+      m.role !== "user"
+        ? { xs: "100%", sm: "100%", md: "calc(100% - 40px)" }
+        : { xs: "100%", sm: "85%", md: "auto" },
                 })}
               >
                 {/* 🔥 Text */}
@@ -184,7 +192,7 @@ export default function ConversationView() {
                 {/* 🔥 Chart Support */}
                 {m.type === 'chart' && <ChartRenderer data={m.chart} />}
               </Paper>
-              {m.role === 'user' && <Avatar sx={{ bgcolor: 'grey.300' }}>U</Avatar>}
+              {m.role === 'user' && <Avatar sx={{ bgcolor: 'grey.300',display:{xs:'none',sm:'none',md:'flex'} }}>U</Avatar>}
             </Stack>
           </Box>
         ))}

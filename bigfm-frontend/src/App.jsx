@@ -380,7 +380,7 @@ const [mobileOpen, setMobileOpen] = useState(false);
               flexGrow: 1,
               px: 3,
               pt: isMobile ? 10 : 3,
-             
+             height:{ xs: '100vh', sm: '100vh', md: 'unset' },
               overflowY: 'auto',
               overflowX: 'hidden',
               mt:{md:'64px'}
