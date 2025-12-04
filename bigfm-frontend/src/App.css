@@ -28,7 +28,7 @@
 }
 
 .markdown {
-  overflow: scroll;
+  overflow: auto;
 }
 
 .markdown table {
