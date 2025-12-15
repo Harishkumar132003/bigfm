@@ -1,9 +1,14 @@
-FROM nginx:alpine
+FROM node:18-alpine
 
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
 
-COPY bigfm-frontend/build /usr/share/nginx/html
-COPY bigfm-frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy only build folder
+COPY bigfm-frontend/build ./build
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Install static server
+RUN npm install -g serve
+
+EXPOSE 3000
+
+# Run static build on port 3000
+CMD ["serve", "-s", "build", "-l", "3000"]

@@ -17,7 +17,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./sql:/docker-entrypoint-initdb.d
     networks:
-      - bigfm-network
+      - shared-app-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$${MYSQL_USER}", "-p$${MYSQL_PASSWORD}"]
       interval: 5s
@@ -42,11 +42,11 @@ services:
       FLASK_ENV: production
       FLASK_APP: app.py
     ports:
-      - "5000:5000"
+      - "5001:5001"
     volumes:
       - ./bigfm-backend:/app
     networks:
-      - bigfm-network
+      - shared-app-network
 
   frontend:
     build:
@@ -57,19 +57,19 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "3000:3000"
     environment:
-      - VITE_API_URL=https://bigfm.wizzgeeks.com/api
+      - VITE_API_URL=https://bigfmanalytics.wizzgeeks.com/api
     volumes:
       - ./bigfm-frontend:/app
       - /app/node_modules
     networks:
-      - bigfm-network
+      - shared-app-network
 
 volumes:
   mysql_data:
   node_modules:
 
 networks:
-  bigfm-network:
+  shared-app-network:
     driver: bridge
