@@ -72,4 +72,4 @@ volumes:
 
 networks:
   shared-app-network:
-    driver: bridge
+    external: true
