@@ -58,7 +58,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_URL=https://bigfmanalytics.wizzgeeks.com/api
+      - VITE_API_URL=https://bigfm.wizzgeeks.com/api
     volumes:
       - ./bigfm-frontend:/app
       - /app/node_modules
